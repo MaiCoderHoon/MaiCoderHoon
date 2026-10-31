@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="260" viewBox="0 0 1000 260">
+<defs><linearGradient id="ln" x1="0" y1="0" x2="1" y2="0">
+<stop offset="0" stop-color="#2EC4A6"/><stop offset="0.4" stop-color="#5B8DEF"/><stop offset="0.7" stop-color="#7C5CFF"/><stop offset="1" stop-color="#FF6B9D"/>
+</linearGradient></defs>
+<path d="M60 96 H940" stroke="url(#ln)" stroke-width="5" stroke-linecap="round" stroke-dasharray="900" stroke-dashoffset="0">
+<animate attributeName="stroke-dashoffset" values="900;0;0;900" keyTimes="0;0.2;0.9;1" dur="10s" repeatCount="indefinite"/>
+</path>
+<g>
+<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.120;0.180;0.90;1" dur="10s" repeatCount="indefinite"/>
+<animateTransform attributeName="transform" type="translate" values="0 16;0 16;0 0;0 0;0 16" keyTimes="0;0.120;0.180;0.90;1" dur="10s" repeatCount="indefinite"/>
+
+<rect x="77" y="44" width="96" height="26" rx="13" fill="#2EC4A6" fill-opacity="0.16"/>
+<text x="125" y="62" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#2EC4A6">Apr 2023</text>
+<circle cx="125" cy="96" r="11" fill="#FFFFFF" stroke="#2EC4A6" stroke-width="4"/>
+<line x1="125" y1="108" x2="125" y2="126" stroke="#2EC4A6" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="17" y="126" width="216" height="118" rx="18" fill="#FFFFFF" stroke="#2EC4A6" stroke-opacity="0.6" stroke-width="2"/>
+<rect x="17" y="126" width="216" height="8" rx="4" fill="#2EC4A6" fill-opacity="0.5"/>
+<text x="125" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">Freelance UX Engineer</text>
+<text x="125" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">&amp; Product Designer</text>
+<text x="125" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#2EC4A6">4+ clients · retention +25%</text>
+</g><g>
+<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.240;0.300;0.90;1" dur="10s" repeatCount="indefinite"/>
+<animateTransform attributeName="transform" type="translate" values="0 16;0 16;0 0;0 0;0 16" keyTimes="0;0.240;0.300;0.90;1" dur="10s" repeatCount="indefinite"/>
+
+<rect x="327" y="44" width="96" height="26" rx="13" fill="#5B8DEF" fill-opacity="0.16"/>
+<text x="375" y="62" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#5B8DEF">Nov 2025</text>
+<circle cx="375" cy="96" r="11" fill="#FFFFFF" stroke="#5B8DEF" stroke-width="4"/>
+<line x1="375" y1="108" x2="375" y2="126" stroke="#5B8DEF" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="267" y="126" width="216" height="118" rx="18" fill="#FFFFFF" stroke="#5B8DEF" stroke-opacity="0.6" stroke-width="2"/>
+<rect x="267" y="126" width="216" height="8" rx="4" fill="#5B8DEF" fill-opacity="0.5"/>
+<text x="375" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">App Developer</text>
+<text x="375" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">GeeksForGeeks · KIIT</text>
+<text x="375" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#5B8DEF">Releases 20% faster</text>
+</g><g>
+<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.360;0.420;0.90;1" dur="10s" repeatCount="indefinite"/>
+<animateTransform attributeName="transform" type="translate" values="0 16;0 16;0 0;0 0;0 16" keyTimes="0;0.360;0.420;0.90;1" dur="10s" repeatCount="indefinite"/>
+
+<rect x="577" y="44" width="96" height="26" rx="13" fill="#7C5CFF" fill-opacity="0.16"/>
+<text x="625" y="62" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#7C5CFF">Dec 2025</text>
+<circle cx="625" cy="96" r="11" fill="#FFFFFF" stroke="#7C5CFF" stroke-width="4"/>
+<line x1="625" y1="108" x2="625" y2="126" stroke="#7C5CFF" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="517" y="126" width="216" height="118" rx="18" fill="#FFFFFF" stroke="#7C5CFF" stroke-opacity="0.6" stroke-width="2"/>
+<rect x="517" y="126" width="216" height="8" rx="4" fill="#7C5CFF" fill-opacity="0.5"/>
+<text x="625" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">Project Lead</text>
+<text x="625" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">MLSA · KIIT Chapter</text>
+<text x="625" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#7C5CFF">Mentored 50+ students</text>
+</g><g>
+<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.480;0.540;0.90;1" dur="10s" repeatCount="indefinite"/>
+<animateTransform attributeName="transform" type="translate" values="0 16;0 16;0 0;0 0;0 16" keyTimes="0;0.480;0.540;0.90;1" dur="10s" repeatCount="indefinite"/>
+<circle cx="875" cy="96" r="11" fill="none" stroke="#FF6B9D" stroke-width="3"><animate attributeName="r" values="11;24;11" dur="2.4s" repeatCount="indefinite"/><animate attributeName="stroke-opacity" values="0.8;0;0.8" dur="2.4s" repeatCount="indefinite"/></circle>
+<rect x="827" y="44" width="96" height="26" rx="13" fill="#FF6B9D" fill-opacity="0.16"/>
+<text x="875" y="62" text-anchor="middle" font-family="'Courier New',monospace" font-size="13" font-weight="700" fill="#FF6B9D">Next</text>
+<circle cx="875" cy="96" r="11" fill="#FFFFFF" stroke="#FF6B9D" stroke-width="4"/>
+<line x1="875" y1="108" x2="875" y2="126" stroke="#FF6B9D" stroke-width="2" stroke-dasharray="3 3"/>
+<rect x="767" y="126" width="216" height="118" rx="18" fill="#FFFFFF" stroke="#FF6B9D" stroke-opacity="0.6" stroke-width="2"/>
+<rect x="767" y="126" width="216" height="8" rx="4" fill="#FF6B9D" fill-opacity="0.5"/>
+<text x="875" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">Open to collaborate</text>
+<text x="875" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">ML · Android · Flutter</text>
+<text x="875" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#FF6B9D">Let's build something</text>
+</g>
+</svg>
