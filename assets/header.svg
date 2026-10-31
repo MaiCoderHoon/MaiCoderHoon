@@ -72,7 +72,7 @@
 
     <!-- typewriter subtitle -->
     <g clip-path="url(#type)">
-      <text x="60" y="196" font-family="'Courier New', monospace" font-size="24" font-weight="700" fill="#5B3DF5">&gt; App Developer · AI Engineer · FDE<tspan fill="#FF6B9D">_</tspan></text>
+      <text x="60" y="196" font-family="'Courier New', monospace" font-size="24" font-weight="700" fill="#5B3DF5">&gt; Ships AI-powered apps for real clients<tspan fill="#FF6B9D">_</tspan></text>
     </g>
 
     <!-- skill chips -->

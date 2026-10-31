@@ -1,0 +1,47 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="218" viewBox="0 0 1000 218">
+<g>
+<rect x="1" y="14" width="210" height="190" rx="20" fill="#FFFFFF" stroke="#2EC4A6" stroke-opacity="0.55" stroke-width="2"/>
+<rect x="1" y="14" width="210" height="190" rx="20" fill="none" stroke="#2EC4A6" stroke-width="4" opacity="0">
+<animate attributeName="opacity" values="0;0;0.9;0.9;0;0" keyTimes="0;0.080;0.140;0.260;0.320;1" dur="8s" repeatCount="indefinite"/></rect>
+<circle cx="31" cy="46" r="16" fill="#2EC4A6"/>
+<text x="31" y="52" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">1</text>
+<text x="57" y="52" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="#2B2140">Understand</text>
+<text x="21" y="96" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">Dig into user flows,</text>
+<text x="21" y="116" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">pain points and constraints.</text>
+<rect x="21" y="150" width="79.2" height="28" rx="14" fill="#2EC4A6" fill-opacity="0.14" stroke="#2EC4A6" stroke-opacity="0.6"/>
+<text x="60.6" y="169" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#2B2140">UX-first</text>
+</g><path d="M228.5 98 L244.5 109 L228.5 120 Z" fill="#2EC4A6"><animate attributeName="opacity" values="0.35;1;0.35" dur="2s" begin="0.0s" repeatCount="indefinite"/></path><g>
+<rect x="264" y="14" width="210" height="190" rx="20" fill="#FFFFFF" stroke="#5B8DEF" stroke-opacity="0.55" stroke-width="2"/>
+<rect x="264" y="14" width="210" height="190" rx="20" fill="none" stroke="#5B8DEF" stroke-width="4" opacity="0">
+<animate attributeName="opacity" values="0;0;0.9;0.9;0;0" keyTimes="0;0.280;0.340;0.460;0.520;1" dur="8s" repeatCount="indefinite"/></rect>
+<circle cx="294" cy="46" r="16" fill="#5B8DEF"/>
+<text x="294" y="52" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">2</text>
+<text x="320" y="52" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="#2B2140">Prototype</text>
+<text x="284" y="96" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">Hi-fi Figma prototypes that</text>
+<text x="284" y="116" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">align everyone before code.</text>
+<rect x="284" y="150" width="113.7" height="28" rx="14" fill="#5B8DEF" fill-opacity="0.14" stroke="#5B8DEF" stroke-opacity="0.6"/>
+<text x="340.9" y="169" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#2B2140">Figma · Hi-Fi</text>
+</g><path d="M491.5 98 L507.5 109 L491.5 120 Z" fill="#5B8DEF"><animate attributeName="opacity" values="0.35;1;0.35" dur="2s" begin="0.4s" repeatCount="indefinite"/></path><g>
+<rect x="527" y="14" width="210" height="190" rx="20" fill="#FFFFFF" stroke="#7C5CFF" stroke-opacity="0.55" stroke-width="2"/>
+<rect x="527" y="14" width="210" height="190" rx="20" fill="none" stroke="#7C5CFF" stroke-width="4" opacity="0">
+<animate attributeName="opacity" values="0;0;0.9;0.9;0;0" keyTimes="0;0.480;0.540;0.660;0.720;1" dur="8s" repeatCount="indefinite"/></rect>
+<circle cx="557" cy="46" r="16" fill="#7C5CFF"/>
+<text x="557" y="52" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">3</text>
+<text x="583" y="52" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="#2B2140">Build</text>
+<text x="547" y="96" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">Kotlin / Flutter apps on</text>
+<text x="547" y="116" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">Python + FastAPI backends.</text>
+<rect x="547" y="150" width="134.4" height="28" rx="14" fill="#7C5CFF" fill-opacity="0.14" stroke="#7C5CFF" stroke-opacity="0.6"/>
+<text x="614.2" y="169" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#2B2140">-15% maintenance</text>
+</g><path d="M754.5 98 L770.5 109 L754.5 120 Z" fill="#7C5CFF"><animate attributeName="opacity" values="0.35;1;0.35" dur="2s" begin="0.8s" repeatCount="indefinite"/></path><g>
+<rect x="790" y="14" width="210" height="190" rx="20" fill="#FFFFFF" stroke="#FF6B9D" stroke-opacity="0.55" stroke-width="2"/>
+<rect x="790" y="14" width="210" height="190" rx="20" fill="none" stroke="#FF6B9D" stroke-width="4" opacity="0">
+<animate attributeName="opacity" values="0;0;0.9;0.9;0;0" keyTimes="0;0.680;0.740;0.860;0.920;1" dur="8s" repeatCount="indefinite"/></rect>
+<circle cx="820" cy="46" r="16" fill="#FF6B9D"/>
+<text x="820" y="52" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="16" font-weight="800" fill="#FFFFFF">4</text>
+<text x="846" y="52" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="18" font-weight="800" fill="#2B2140">Ship &amp; iterate</text>
+<text x="810" y="96" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">Full SDLC, from DB design</text>
+<text x="810" y="116" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13" fill="#2B2140">to deployment for 4+ clients.</text>
+<rect x="810" y="150" width="120.6" height="28" rx="14" fill="#FF6B9D" fill-opacity="0.14" stroke="#FF6B9D" stroke-opacity="0.6"/>
+<text x="870.3" y="169" text-anchor="middle" font-family="'Courier New',monospace" font-size="12" font-weight="700" fill="#2B2140">retention +25%</text>
+</g>
+</svg>

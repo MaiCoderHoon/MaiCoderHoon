@@ -54,8 +54,8 @@
 <line x1="875" y1="108" x2="875" y2="126" stroke="#FF6B9D" stroke-width="2" stroke-dasharray="3 3"/>
 <rect x="767" y="126" width="216" height="118" rx="18" fill="#FFFFFF" stroke="#FF6B9D" stroke-opacity="0.6" stroke-width="2"/>
 <rect x="767" y="126" width="216" height="8" rx="4" fill="#FF6B9D" fill-opacity="0.5"/>
-<text x="875" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">Open to collaborate</text>
-<text x="875" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">ML · Android · Flutter</text>
-<text x="875" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#FF6B9D">Let's build something</text>
+<text x="875" y="164" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="15" font-weight="800" fill="#2B2140">Your problem, shipped</text>
+<text x="875" y="185" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="13.5" font-weight="600" fill="#8A7FA8">Discovery → build → deploy</text>
+<text x="875" y="222" text-anchor="middle" font-family="'Segoe UI','Helvetica Neue',Arial,sans-serif" font-size="12.5" font-weight="700" fill="#FF6B9D">Let's talk</text>
 </g>
 </svg>

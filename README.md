@@ -3,7 +3,7 @@
 <img src="assets/header.svg" alt="Piyush Bisoi — App Developer & AI Engineer" width="100%"/>
 
 <a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+Android+%26+Flutter+apps+with+Clean+Architecture;Turning+ML+%26+LLMs+into+products+people+use;Shipping+end-to-end+for+real+clients;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+Android+%26+Flutter+apps+with+Clean+Architecture;Turning+ML+%26+LLMs+into+products+people+use;From+client+problem+to+deployed+product%2C+end+to+end;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
 </a>
 
 <br/>
@@ -25,6 +25,14 @@
 
 <div align="center">
   <img src="assets/whoami.svg" alt="whoami.py" width="100%"/>
+</div>
+
+<img src="assets/divider.svg" width="100%"/>
+
+## 🛠️ How I Work With Clients
+
+<div align="center">
+  <img src="assets/delivery.svg" alt="Understand, prototype, build, ship and iterate" width="100%"/>
 </div>
 
 <img src="assets/divider.svg" width="100%"/>
@@ -101,7 +109,7 @@ flowchart LR
 
 <div align="center">
 
-**Open to App Developer, AI Engineer and Forward Deployed Engineer roles, and to building applied-AI products on Android / Flutter.**
+**Got a messy real-world problem? I like turning those into working software, from the first conversation to deployment.**
 
 <a href="https://www.linkedin.com/in/piyush-bisoi"><img src="https://img.shields.io/badge/Say_hi_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
 <a href="mailto:piyush993bisoi@outlook.com"><img src="https://img.shields.io/badge/Drop_a-Mail-FF6B9D?style=for-the-badge&logo=microsoftoutlook&logoColor=white"/></a>
