@@ -3,7 +3,7 @@
 <img src="assets/header.svg" alt="Piyush Bisoi — Data & Product Engineer" width="100%"/>
 
 <a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+scam-busting+AI+for+real+people;Turning+messy+data+into+honest+ML+pipelines;Shipping+Android+%26+Flutter+apps+with+Clean+Architecture;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Turning+messy+data+into+honest+ML+pipelines;Shipping+Android+%26+Flutter+apps+with+Clean+Architecture;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
 </a>
 
 <br/>
@@ -40,28 +40,6 @@
 </tr>
 </table>
 </div>
-
-<details open>
-<summary><b>🛡️ How ScamBust works</b> &nbsp;·&nbsp; <i>click to fold</i></summary>
-
-<br/>
-
-- ⚡ **FastAPI + Jetpack Compose** ecosystem processing threat data in **under 200 ms**
-- 🧠 **Dual-layer NLP classifier** (on-device patterns + cloud analysis) at **94% accuracy**, cutting accidental scam-link clicks by **90%**
-- ♿ Senior-first UX: high-contrast **Green / Yellow / Red** status and 60 dp+ touch targets
-
-```mermaid
-%%{init: {'theme':'base','themeVariables':{'primaryColor':'#EFE9FF','primaryBorderColor':'#7C5CFF','primaryTextColor':'#2B2140','lineColor':'#FF6B9D','secondaryColor':'#FFE8F2','tertiaryColor':'#E0F7F0'}}}%%
-flowchart LR
-    A[📩 Incoming SMS] --> B{Layer 1<br/>On-device patterns}
-    B -- known scam --> R[🔴 Full-screen guardian alert]
-    B -- unknown sender --> C[☁️ Layer 2<br/>FastAPI + NLP risk score]
-    C -- low --> G[🟢 Safe]
-    C -- medium --> Y[🟡 Be careful]
-    C -- high --> R
-```
-
-</details>
 
 <details>
 <summary><b>🛒 How the pricing pipeline works</b> &nbsp;·&nbsp; <i>click to unfold</i></summary>
