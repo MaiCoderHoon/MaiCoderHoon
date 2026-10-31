@@ -1,0 +1,81 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="280" viewBox="0 0 1000 280">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0f0c29">
+        <animate attributeName="stop-color" values="#0f0c29;#1b1146;#07254d;#0f0c29" dur="14s" repeatCount="indefinite"/>
+      </stop>
+      <stop offset="1" stop-color="#302b63">
+        <animate attributeName="stop-color" values="#302b63;#0b4f6c;#4a1d6b;#302b63" dur="14s" repeatCount="indefinite"/>
+      </stop>
+    </linearGradient>
+    <linearGradient id="shimmer" gradientUnits="userSpaceOnUse" x1="0" y1="0" x2="500" y2="0" spreadMethod="reflect">
+      <stop offset="0" stop-color="#00f5d4"/>
+      <stop offset="0.5" stop-color="#a78bfa"/>
+      <stop offset="1" stop-color="#ff5da2"/>
+      <animateTransform attributeName="gradientTransform" type="translate" from="0 0" to="1000 0" dur="6s" repeatCount="indefinite"/>
+    </linearGradient>
+    <filter id="glow" x="-20%" y="-50%" width="140%" height="200%">
+      <feGaussianBlur stdDeviation="4" result="b"/>
+      <feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <clipPath id="type">
+      <rect x="60" y="150" width="0" height="40">
+        <animate attributeName="width" values="0;700;700;0" keyTimes="0;0.4;0.85;1" dur="7s" repeatCount="indefinite"/>
+      </rect>
+    </clipPath>
+  </defs>
+
+  <rect width="1000" height="280" rx="18" fill="url(#bg)"/>
+
+  <!-- grid -->
+  <g stroke="#ffffff" stroke-opacity="0.05">
+    <path d="M0 70H1000M0 140H1000M0 210H1000M125 0V280M250 0V280M375 0V280M500 0V280M625 0V280M750 0V280M875 0V280"/>
+  </g>
+
+  <!-- twinkling stars -->
+  <g fill="#fff">
+    <circle cx="80" cy="40" r="1.6"><animate attributeName="opacity" values="0.1;1;0.1" dur="3s" repeatCount="indefinite"/></circle>
+    <circle cx="190" cy="230" r="1.2"><animate attributeName="opacity" values="1;0.1;1" dur="2.4s" repeatCount="indefinite"/></circle>
+    <circle cx="300" cy="55" r="1.8"><animate attributeName="opacity" values="0.1;1;0.1" dur="4s" repeatCount="indefinite"/></circle>
+    <circle cx="420" cy="245" r="1.4"><animate attributeName="opacity" values="0.2;1;0.2" dur="2.8s" repeatCount="indefinite"/></circle>
+    <circle cx="520" cy="35" r="1.2"><animate attributeName="opacity" values="1;0.1;1" dur="3.4s" repeatCount="indefinite"/></circle>
+    <circle cx="610" cy="215" r="1.8"><animate attributeName="opacity" values="0.1;1;0.1" dur="2.2s" repeatCount="indefinite"/></circle>
+    <circle cx="700" cy="60" r="1.3"><animate attributeName="opacity" values="0.3;1;0.3" dur="3.8s" repeatCount="indefinite"/></circle>
+    <circle cx="940" cy="40" r="1.6"><animate attributeName="opacity" values="1;0.1;1" dur="2.6s" repeatCount="indefinite"/></circle>
+    <circle cx="960" cy="240" r="1.2"><animate attributeName="opacity" values="0.1;1;0.1" dur="3.2s" repeatCount="indefinite"/></circle>
+    <circle cx="40" cy="170" r="1.4"><animate attributeName="opacity" values="0.2;1;0.2" dur="4.2s" repeatCount="indefinite"/></circle>
+  </g>
+
+  <!-- orbit system -->
+  <g transform="translate(830 140)">
+    <circle r="40" fill="none" stroke="#00f5d4" stroke-opacity="0.35" stroke-dasharray="4 6">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="20s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="75" fill="none" stroke="#a78bfa" stroke-opacity="0.35" stroke-dasharray="2 8">
+      <animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="30s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="110" fill="none" stroke="#ff5da2" stroke-opacity="0.25" stroke-dasharray="6 10">
+      <animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="45s" repeatCount="indefinite"/>
+    </circle>
+    <circle r="14" fill="#00f5d4" filter="url(#glow)">
+      <animate attributeName="r" values="12;17;12" dur="3s" repeatCount="indefinite"/>
+    </circle>
+    <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="6s" repeatCount="indefinite"/>
+      <circle cx="40" r="5" fill="#00f5d4" filter="url(#glow)"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" from="360" to="0" dur="11s" repeatCount="indefinite"/>
+      <circle cx="75" r="6" fill="#a78bfa" filter="url(#glow)"/></g>
+    <g><animateTransform attributeName="transform" type="rotate" from="0" to="360" dur="17s" repeatCount="indefinite"/>
+      <circle cx="110" r="7" fill="#ff5da2" filter="url(#glow)"/></g>
+  </g>
+
+  <!-- name -->
+  <text x="60" y="125" font-family="'Segoe UI', Helvetica, Arial, sans-serif" font-size="66" font-weight="800" fill="url(#shimmer)" filter="url(#glow)">Piyush Bisoi</text>
+
+  <!-- typewriter subtitle -->
+  <g clip-path="url(#type)">
+    <text x="60" y="178" font-family="'Courier New', monospace" font-size="24" fill="#d9e2ff">&gt; Data &amp; Product Engineer · ML · Android<tspan fill="#00f5d4">_</tspan></text>
+  </g>
+
+  <!-- border -->
+  <rect x="1" y="1" width="998" height="278" rx="18" fill="none" stroke="url(#shimmer)" stroke-opacity="0.6" stroke-width="2"/>
+</svg>
