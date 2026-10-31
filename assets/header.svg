@@ -72,7 +72,7 @@
 
     <!-- typewriter subtitle -->
     <g clip-path="url(#type)">
-      <text x="60" y="196" font-family="'Courier New', monospace" font-size="24" font-weight="700" fill="#5B3DF5">&gt; Data &amp; Product Engineer · ML · Android<tspan fill="#FF6B9D">_</tspan></text>
+      <text x="60" y="196" font-family="'Courier New', monospace" font-size="24" font-weight="700" fill="#5B3DF5">&gt; App Developer · AI Engineer · FDE<tspan fill="#FF6B9D">_</tspan></text>
     </g>
 
     <!-- skill chips -->
@@ -80,17 +80,17 @@
       <g opacity="1">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.20;0.25;0.85;1" dur="8s" repeatCount="indefinite"/>
         <rect x="60" y="226" width="106" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.85" stroke="#7C5CFF" stroke-width="1.5"/>
-        <text x="113" y="247">Python</text>
+        <text x="113" y="247">Kotlin</text>
       </g>
       <g opacity="1">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.26;0.31;0.85;1" dur="8s" repeatCount="indefinite"/>
         <rect x="178" y="226" width="106" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.85" stroke="#FF6B9D" stroke-width="1.5"/>
-        <text x="231" y="247">Kotlin</text>
+        <text x="231" y="247">Flutter</text>
       </g>
       <g opacity="1">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.32;0.37;0.85;1" dur="8s" repeatCount="indefinite"/>
         <rect x="296" y="226" width="106" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.85" stroke="#2EC4A6" stroke-width="1.5"/>
-        <text x="349" y="247">Flutter</text>
+        <text x="349" y="247">Python</text>
       </g>
       <g opacity="1">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.38;0.43;0.85;1" dur="8s" repeatCount="indefinite"/>
@@ -100,7 +100,7 @@
       <g opacity="1">
         <animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;0.44;0.49;0.85;1" dur="8s" repeatCount="indefinite"/>
         <rect x="532" y="226" width="106" height="32" rx="16" fill="#FFFFFF" fill-opacity="0.85" stroke="#5B8DEF" stroke-width="1.5"/>
-        <text x="585" y="247">SQL</text>
+        <text x="585" y="247">LLMs</text>
       </g>
     </g>
 

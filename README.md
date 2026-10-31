@@ -1,9 +1,9 @@
 <div align="center">
 
-<img src="assets/header.svg" alt="Piyush Bisoi — Data & Product Engineer" width="100%"/>
+<img src="assets/header.svg" alt="Piyush Bisoi — App Developer & AI Engineer" width="100%"/>
 
 <a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Turning+messy+data+into+honest+ML+pipelines;Shipping+Android+%26+Flutter+apps+with+Clean+Architecture;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+Android+%26+Flutter+apps+with+Clean+Architecture;Turning+ML+%26+LLMs+into+products+people+use;Shipping+end-to-end+for+real+clients;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
 </a>
 
 <br/>
@@ -35,8 +35,8 @@
 <table>
 <tr>
 <td align="center"><a href="https://github.com/MaiCoderHoon/scambust"><img src="assets/card-scambust.svg" alt="ScamBust" width="320"/></a></td>
-<td align="center"><a href="https://github.com/MaiCoderHoon/flipkart-price-prediction"><img src="assets/card-flipkart.svg" alt="Flipkart Price Prediction" width="320"/></a></td>
 <td align="center"><img src="assets/card-tasksync.svg" alt="TaskSync" width="320"/></td>
+<td align="center"><a href="https://github.com/MaiCoderHoon/flipkart-price-prediction"><img src="assets/card-flipkart.svg" alt="Flipkart Price Prediction" width="320"/></a></td>
 </tr>
 </table>
 </div>
@@ -101,7 +101,7 @@ flowchart LR
 
 <div align="center">
 
-**Open to collaborating on ML pipelines, Android / Flutter products and data-driven product design.**
+**Open to App Developer, AI Engineer and Forward Deployed Engineer roles, and to building applied-AI products on Android / Flutter.**
 
 <a href="https://www.linkedin.com/in/piyush-bisoi"><img src="https://img.shields.io/badge/Say_hi_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white"/></a>
 <a href="mailto:piyush993bisoi@outlook.com"><img src="https://img.shields.io/badge/Drop_a-Mail-FF6B9D?style=for-the-badge&logo=microsoftoutlook&logoColor=white"/></a>
