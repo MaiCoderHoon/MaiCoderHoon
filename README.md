@@ -3,7 +3,7 @@
 <img src="assets/header.svg" alt="Piyush Bisoi — App Developer & AI Engineer" width="100%"/>
 
 <a href="https://git.io/typing-svg">
-  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+Android+%26+Flutter+apps+with+Clean+Architecture;Turning+ML+%26+LLMs+into+products+people+use;From+client+problem+to+deployed+product%2C+end+to+end;Mentoring+50%2B+students+at+KIIT" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.demolab.com?font=Fira+Code&weight=600&size=22&duration=2800&pause=900&color=7C5CFF&center=true&vCenter=true&width=720&lines=Building+Android+%26+Flutter+apps+with+Clean+Architecture;Turning+ML+%26+LLMs+into+products+people+use;From+client+problem+to+deployed+product%2C+end+to+end;Mentored+15%2B+people" alt="Typing SVG" />
 </a>
 
 <br/>
