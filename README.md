@@ -27,12 +27,6 @@
   <img src="assets/whoami.svg" alt="whoami.py" width="100%"/>
 </div>
 
-<br/>
-
-<div align="center">
-  <img src="assets/achievements.svg" alt="Achievements unlocked" width="100%"/>
-</div>
-
 <img src="assets/divider.svg" width="100%"/>
 
 ## 🚀 Featured Projects
