@@ -1,13 +1,16 @@
 #!/usr/bin/env python3
-"""Render the stats card: GitHub stats, contribution graph and "now exploring".
+"""Render the live GitHub stats used in the profile README.
+
+    stats.svg          four sticker tiles: public repos, commits, pull requests, stars
+    contributions.svg  the contribution graph for the last year
 
 Run by .github/workflows/stats.yml every 10 minutes (standard library only); the
-workflow publishes the result to the `output` branch, which the README embeds.
-If GitHub can't be reached nothing is written, so the last good card stays live.
+workflow publishes both files to the `output` branch, which the README embeds.
+If GitHub can't be reached nothing is written, so the last good cards stay live.
 
-    python gen_stats.py                  # writes assets/stats.svg
-    python gen_stats.py --out dist/x.svg
-    python gen_stats.py --placeholder    # empty data, for layout checks
+    python gen_stats.py                     # writes dist/stats.svg + dist/contributions.svg
+    python gen_stats.py --out-dir some/dir
+    python gen_stats.py --placeholder       # empty data, for layout checks
 """
 import datetime
 import json
@@ -17,23 +20,21 @@ import sys
 import urllib.parse
 import urllib.request
 
-from svgkit import C, MARGIN, W, Scene, cap, github_mark, icon, line, poster_bg, rect, section_title, text, tw, write
+from svgkit import C, doc, fmt, github_mark, icon, rect, text, tw
 
 OWNER = os.environ.get("GITHUB_REPOSITORY_OWNER") or "MaiCoderHoon"
 TOKEN = os.environ.get("GITHUB_TOKEN")
-LEVELS = ["#0B3D14", "#22802A", "#4BAE2C", "#97DE1A", C["lime"]]
-EXPLORING = [("ML / AI", "sparkle"), ("Data Science", "database"), ("App Dev", "smartphone")]
+INK, PAPER = C["ink"], C["paper"]
+LEVELS = ["#ECE4D7", C["lime"], "#8EDB3A", "#4FAF3A", "#2A7A2E"]  # none, then brand lime -> deep green
+MONTHS = "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec".split()
 
-# Only the "today" outline and the live dot pulse, and never below 20% opacity, so the card
-# is fully drawn in every frame (previews and thumbnails included).
-STYLE = (
-    "<style>"
-    "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}"
-    ".today,.live{animation:pulse 1.6s ease-in-out infinite}"
-    "@media (prefers-reduced-motion:reduce){.today,.live{animation:none}}"
-    "</style>"
-)
+# Only the "today" outline and the live dot pulse, and never below 25% opacity, so the
+# cards are fully drawn in every frame (previews and thumbnails included).
+STYLE = ("@keyframes pulse{0%,100%{opacity:1}50%{opacity:.25}}"
+         ".today,.live{animation:pulse 1.6s ease-in-out infinite}")
 
+
+# ------------------------------------------------------------------ data
 
 def request(url, data=None, accept="application/vnd.github+json"):
     headers = {"Accept": accept, "User-Agent": "profile-stats-card"}
@@ -50,12 +51,13 @@ def api(path):
 
 def calendar_graphql():
     query = ('query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{'
-             'totalContributions weeks{contributionDays{weekday contributionLevel}}}}}}')
+             'totalContributions weeks{contributionDays{date weekday contributionLevel}}}}}}')
     body = json.dumps({"query": query, "variables": {"login": OWNER}}).encode()
     cal = json.loads(request("https://api.github.com/graphql", data=body))["data"]["user"][
         "contributionsCollection"]["contributionCalendar"]
     names = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"]
-    weeks = [[(d["weekday"], names.index(d["contributionLevel"])) for d in w["contributionDays"]] for w in cal["weeks"]]
+    weeks = [[(d["weekday"], names.index(d["contributionLevel"]), d["date"]) for d in w["contributionDays"]]
+             for w in cal["weeks"]]
     return cal["totalContributions"], weeks
 
 
@@ -65,12 +67,14 @@ def calendar_html():
     for tag in re.findall(r"<td[^>]*ContributionCalendar-day[^>]*>", page):
         m = re.search(r'id="contribution-day-component-(\d+)-(\d+)"', tag)
         lv = re.search(r'data-level="(\d)"', tag)
-        if m and lv:
-            cells.setdefault(int(m.group(2)), []).append((int(m.group(1)), int(lv.group(1))))
+        dt = re.search(r'data-date="([\d-]+)"', tag)
+        if m and lv and dt:
+            cells.setdefault(int(m.group(2)), []).append((int(m.group(1)), int(lv.group(1)), dt.group(1)))
     total = re.search(r"([\d,]+)\s+contributions?\s+in the last year", page)
     if not cells:
         raise RuntimeError("no calendar cells found")
-    return (int(total.group(1).replace(",", "")) if total else None), [cells[k] for k in sorted(cells)]
+    weeks = [sorted(cells[k]) for k in sorted(cells)]
+    return (int(total.group(1).replace(",", "")) if total else None), weeks
 
 
 def collect():
@@ -95,70 +99,76 @@ def short(n):
     return str(n)
 
 
-def render(data, synced):
-    h = 200
-    sc = Scene(h)
-    sc.defs.append(STYLE)
-    sc.add(poster_bg(W, h))
-    sc.add(line(MARGIN, 10, W - MARGIN, 10, C["ink"], 1.5))
+# ------------------------------------------------------------------ cards
 
-    # GitHub stats
-    sc.add(section_title(MARGIN, 62, "GITHUB STATS", mark="square", size=22))
-    sc.add(github_mark(MARGIN + 2, 96, 60, C["ink"]))
-    stats = [("Repos", data["repos"]), ("Commits", data["commits"]), ("PRs", data["prs"]), ("Stars", data["stars"])]
-    for i, (label, value) in enumerate(stats):
-        cx = 172 + i * 92
-        sc.add(text("display", short(value), cx, 132, 31, C["ink"], anchor="middle", ls=-0.02))
-        sc.add(text("body", label, cx, 160, 16.5, C["text"], anchor="middle"))
-        if i:
-            sc.add(f'<circle cx="{cx - 46}" cy="122" r="2.2" fill="{C["ink"]}"/>')
-    sc.add(line(492, 34, 492, 186, C["ink"], 1.5))
+def sticker(x, y, w, h, rx=16):
+    return (rect(x + 1, y + 3, w, h, INK, rx=rx, extra=' opacity=".14"')
+            + rect(x, y, w, h, PAPER, rx=rx, stroke=INK, sw=2.2))
 
-    # contribution graph
-    gx0, gx1, gy = 518, 1000, 88
-    sc.add(section_title(gx0, 62, "CONTRIBUTION GRAPH", mark="square", size=22))
-    weeks = data["weeks"] or [[(d, 0) for d in range(7)] for _ in range(53)]
-    cell = (gx1 - gx0) / len(weeks)
-    sc.add(rect(gx0, gy, gx1 - gx0, cell * 7, "#062B0D"))
+
+def render_stats(data):
+    """Four tiles, 404 x 120. Labels stay short so they read at phone width."""
+    tiles = [("Repos", data["repos"], "github"), ("Commits", data["commits"], "commit"),
+             ("PRs", data["prs"], "pull_request"), ("Stars", data["stars"], "star")]
+    tw_, gap, body = 91, 12, []
+    for i, (label, value, ic) in enumerate(tiles):
+        x = 2 + i * (tw_ + gap)
+        cx = x + tw_ / 2
+        body.append(sticker(x, 4, tw_, 108))
+        if ic == "github":
+            body.append(github_mark(cx - 12, 18, 24, INK))
+        elif ic == "star":
+            body.append(icon("star", cx - 13, 17, 26, INK, 2.2).replace('fill="none"', f'fill="{C["lime"]}"'))
+        else:
+            body.append(icon(ic, cx - 13, 17, 26, INK, 2.3))
+        body.append(text("display", short(value), cx, 78, 27, INK, anchor="middle", ls=-0.02))
+        body.append(text("body", label, cx, 99, 14.5, C["muted"], anchor="middle"))
+    alt = ", ".join(f"{short(v)} {label.lower()}" for label, v, _ in tiles)
+    return doc(406, 118, "".join(body), f"GitHub stats for {OWNER}: {alt}")
+
+
+def render_graph(data, synced):
+    """Contribution graph card, 440 x 118."""
+    W, H = 440, 118
+    weeks = data["weeks"] or [[(d, 0, None) for d in range(7)] for _ in range(53)]
+    x0, x1, gy = 16, W - 16, 32
+    pitch = (x1 - x0) / len(weeks)
+    cell = pitch - 1.6
+    body = [sticker(2, 4, W - 6, H - 10)]
+    # month labels where a new month starts, skipping any that would collide or overflow
+    last_label_end = -99
     for i, week in enumerate(weeks):
-        sc.add("".join(rect(gx0 + i * cell + 0.6, gy + day * cell + 0.6, cell - 1.2, cell - 1.2, LEVELS[level])
-                       for day, level in week))
-    if data["weeks"] and data["weeks"][-1]:  # blinking outline on the most recent day
-        day, _ = data["weeks"][-1][-1]
-        sc.add(rect(gx0 + (len(weeks) - 1) * cell, gy + day * cell, cell, cell, "none", stroke=C["pink"], sw=1.6,
-                    extra=' class="today"'))
-    caption = (f"{data['total']:,} contributions in the last year" if isinstance(data.get("total"), int)
-               else "Contributions in the last year")
-    cy = gy + cell * 7 + 30
-    sc.add(text("body", caption, gx0, cy, 15, C["muted"]))
-    stamp = f"Synced {synced}"
-    sc.add(text("mono", stamp, gx1, cy, 12.5, C["muted"], anchor="end"))
-    dot_x = gx1 - tw("mono", stamp, 12.5) - 13
-    sc.add(f'<circle class="live" cx="{dot_x:.1f}" cy="{cy - 4.5:.1f}" r="4" fill="{C["pink"]}"/>')
-    sc.add(line(1026, 34, 1026, 186, C["ink"], 1.5))
+        first = week[0][2]
+        if not first:
+            continue
+        d = datetime.date.fromisoformat(first)
+        lx, label = x0 + i * pitch, MONTHS[d.month - 1]
+        end = lx + tw("body", label, 10.5)
+        if d.day <= 7 and lx - last_label_end > 6 and end <= x1:
+            body.append(text("body", label, lx, 25, 10.5, C["muted"]))
+            last_label_end = end
+    for i, week in enumerate(weeks):
+        body.append("".join(rect(x0 + i * pitch + 0.8, gy + day * pitch + 0.8, cell, cell, LEVELS[level], rx=1.6)
+                            for day, level, _ in week))
+    if data["weeks"] and data["weeks"][-1]:  # pulsing outline on the most recent day
+        day = data["weeks"][-1][-1][0]
+        body.append(rect(x0 + (len(weeks) - 1) * pitch, gy + day * pitch, pitch, pitch, "none",
+                         rx=2, stroke=C["pink"], sw=1.8, extra=' class="today"'))
+    cy = gy + 7 * pitch + 16
+    total = data.get("total")
+    caption = f"{total:,} contributions in the last year" if isinstance(total, int) else "Contributions in the last year"
+    body.append(text("semi", caption, x0, cy, 11.5, INK))
+    stamp = f"synced {synced}"
+    body.append(text("mono", stamp, x1, cy, 10, C["muted"], anchor="end"))
+    dot_x = x1 - tw("mono", stamp, 10) - 9
+    body.append(f'<circle class="live" cx="{fmt(dot_x)}" cy="{fmt(cy - 3.5)}" r="3.4" fill="{C["pink"]}"/>')
+    return doc(W, H, "".join(body), f"Contribution graph for {OWNER}: {caption.lower()}", style=STYLE)
 
-    # now exploring
-    nx0, nx1 = 1052, W - MARGIN
-    sc.add(section_title(nx0, 62, "NOW EXPLORING", mark="square", size=22))
-    size, pad, isz, gap, ph = 17, 15, 20, 10, 50
 
-    def pw(label, s):
-        return pad + isz + 9 + tw("semi", label, s) + pad
-
-    while sum(pw(l, size) for l, _ in EXPLORING) + gap * (len(EXPLORING) - 1) > nx1 - nx0:
-        size -= 0.25
-    px, py = nx0, 94
-    for label, ic in EXPLORING:
-        w = pw(label, size)
-        sc.add(rect(px + 0.75, py + 0.75, w - 1.5, ph - 1.5, C["tile"], rx=12, stroke=C["tile_line"], sw=1.5))
-        sc.add(icon(ic, px + pad, py + (ph - isz) / 2, isz, C["ink"], 1.9))
-        sc.add(text("semi", label, px + pad + isz + 9, py + ph / 2 + cap("semi", size) / 2, size, C["ink"]))
-        px += w + gap
-    return sc.svg(title="GitHub stats, contribution graph and what I'm exploring now")
-
+# ------------------------------------------------------------------ main
 
 def main():
-    out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else None
+    out_dir = sys.argv[sys.argv.index("--out-dir") + 1] if "--out-dir" in sys.argv else "dist"
     if "--placeholder" in sys.argv:
         data = {"repos": "–", "commits": "–", "prs": "–", "stars": "–", "total": None, "weeks": []}
         synced = "pending"
@@ -169,14 +179,12 @@ def main():
             print("stats refresh skipped:", exc)
             return 0
         synced = datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M UTC")
-    svg = render(data, synced)
-    if out:
-        os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
-        with open(out, "w", encoding="utf-8", newline="\n") as f:
+    os.makedirs(out_dir, exist_ok=True)
+    for name, svg in (("stats.svg", render_stats(data)), ("contributions.svg", render_graph(data, synced))):
+        dest = os.path.join(out_dir, name)
+        with open(dest, "w", encoding="utf-8", newline="\n") as f:
             f.write(svg)
-        print("wrote", out)
-    else:
-        print("wrote", write("stats.svg", svg))
+        print("wrote", dest)
     return 0
 
 
