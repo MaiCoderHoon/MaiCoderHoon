@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="390" viewBox="0 0 1200 390">
+<defs><pattern id="dots" width="28" height="28" patternUnits="userSpaceOnUse"><circle cx="4" cy="4" r="1.8" fill="#171717" opacity=".18"/></pattern></defs>
+<rect width="1200" height="390" fill="#F7F2E8"/><rect width="1200" height="390" fill="url(#dots)"/>
+<rect x="20" y="20" width="1160" height="350" fill="none" stroke="#171717" stroke-width="4"/>
+<path d="M20 20H1180V54H20Z" fill="#CBFF4D" stroke="#171717" stroke-width="4"/>
+<circle cx="48" cy="37" r="7" fill="#FF725E" stroke="#171717" stroke-width="2"/><circle cx="72" cy="37" r="7" fill="#7557FF" stroke="#171717" stroke-width="2"/><circle cx="96" cy="37" r="7" fill="#F7F2E8" stroke="#171717" stroke-width="2"/>
+<text x="120" y="43" font-family="Courier New" font-size="15" font-weight="bold" fill="#171717">HELLO WORLD! / PERSONAL PROFILE.EXE</text>
+<text x="68" y="174" font-family="Arial" font-size="98" font-weight="900" letter-spacing="-5" fill="#171717">PIYUSH</text>
+<text x="68" y="270" font-family="Arial" font-size="98" font-weight="900" letter-spacing="-5" fill="#171717">BISOI<tspan fill="#7557FF">!</tspan></text>
+<rect x="760" y="105" width="340" height="180" fill="#CBFF4D" stroke="#171717" stroke-width="4" transform="rotate(3 930 195)"/>
+<text x="790" y="151" font-family="Courier New" font-size="17" font-weight="bold" fill="#171717">CURRENT QUEST</text>
+<path d="M790 166H1060" stroke="#171717" stroke-width="3"/>
+<text x="790" y="211" font-family="Arial" font-size="27" font-weight="900" fill="#171717">DESIGN IT.</text><text x="790" y="247" font-family="Arial" font-size="27" font-weight="900" fill="#171717">BUILD IT.</text>
+<circle cx="1090" cy="95" r="31" fill="#FF725E" stroke="#171717" stroke-width="4"/><path d="M1076 95h28M1090 81v28" stroke="#171717" stroke-width="5"/>
+<text x="70" y="330" font-family="Courier New" font-size="19" font-weight="bold" fill="#171717">DESIGN × CODE × PRODUCT × A LITTLE CURIOSITY</text>
+</svg>

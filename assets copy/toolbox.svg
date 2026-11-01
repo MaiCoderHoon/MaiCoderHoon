@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="100" viewBox="0 0 1000 100">
+<rect x="3" y="3" width="994" height="94" fill="#F7F2E8" stroke="#171717" stroke-width="4"/>
+<g font-family="Courier New" font-size="17" font-weight="bold" fill="#171717">
+<rect x="18" y="18" width="290" height="64" fill="#CBFF4D" stroke="#171717" stroke-width="3"/><text x="36" y="43">01 / DESIGN</text><text x="36" y="66" font-size="14">FIGMA · UX · PROTOTYPES</text>
+<rect x="355" y="18" width="290" height="64" fill="#FF725E" stroke="#171717" stroke-width="3"/><text x="373" y="43">02 / BUILD</text><text x="373" y="66" font-size="14">FLUTTER · KOTLIN · DART</text>
+<rect x="692" y="18" width="290" height="64" fill="#B7A6FF" stroke="#171717" stroke-width="3"/><text x="710" y="43">03 / EXPLORE</text><text x="710" y="66" font-size="14">PYTHON · SQL · AI / ML</text>
+</g></svg>

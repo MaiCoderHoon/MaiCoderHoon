@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="150" viewBox="0 0 1000 150">
+<rect x="3" y="3" width="994" height="144" fill="#F7F2E8" stroke="#171717" stroke-width="4"/>
+<path d="M90 74H900" stroke="#171717" stroke-width="5" stroke-dasharray="10 8"/>
+<g font-family="Courier New" font-weight="bold" fill="#171717" text-anchor="middle">
+<circle cx="150" cy="74" r="23" fill="#CBFF4D" stroke="#171717" stroke-width="4"/><text x="150" y="35" font-size="15">DESIGN</text><text x="150" y="119" font-size="13">PRODUCT THINKING</text>
+<circle cx="390" cy="74" r="23" fill="#FF725E" stroke="#171717" stroke-width="4"/><text x="390" y="35" font-size="15">COMMUNITY</text><text x="390" y="119" font-size="13">COLLABORATION</text>
+<circle cx="630" cy="74" r="23" fill="#B7A6FF" stroke="#171717" stroke-width="4"/><text x="630" y="35" font-size="15">ENGINEERING</text><text x="630" y="119" font-size="13">APPS &amp; SYSTEMS</text>
+<circle cx="870" cy="74" r="23" fill="#CBFF4D" stroke="#171717" stroke-width="4"/><text x="870" y="35" font-size="15">WHAT'S NEXT?</text><text x="870" y="119" font-size="13">STILL EXPLORING</text>
+</g></svg>

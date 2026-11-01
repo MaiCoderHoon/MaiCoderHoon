@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="220" viewBox="0 0 1000 220">
+<rect x="3" y="3" width="994" height="214" fill="#F7F2E8" stroke="#171717" stroke-width="4"/><rect x="3" y="3" width="994" height="35" fill="#7557FF"/>
+<text x="25" y="27" font-family="Courier New" font-size="15" font-weight="bold" fill="#fff">README / HUMAN.TXT</text>
+<text x="35" y="82" font-family="Arial" font-size="23" font-weight="900" fill="#171717">01  Designer's eye. Developer's hands.</text>
+<text x="35" y="122" font-family="Arial" font-size="20" fill="#171717">02  I move between interfaces, mobile apps and applied AI.</text>
+<text x="35" y="162" font-family="Arial" font-size="20" fill="#171717">03  I learn by building, testing, breaking and trying again.</text>
+<rect x="35" y="178" width="350" height="27" fill="#CBFF4D" stroke="#171717" stroke-width="2"/>
+<text x="47" y="197" font-family="Courier New" font-size="14" font-weight="bold" fill="#171717">STATUS: CURIOUS / ALWAYS ITERATING</text>
+<path d="M910 72l24 24-24 24-24-24z" fill="#FF725E" stroke="#171717" stroke-width="3"/><circle cx="910" cy="96" r="7" fill="#171717"/>
+</svg>
