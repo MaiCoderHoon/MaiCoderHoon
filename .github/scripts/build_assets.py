@@ -3,17 +3,19 @@
 
     python .github/scripts/build_assets.py
 
-Change the copy or links below, then re-run. The poster is a stack of full-width
-SVG rows; rows with buttons are cut into slices so each button can be its own
-link. The stats row (assets/stats.svg) is refreshed by gen_stats.py on a schedule.
+Change the copy or links below, then re-run. The poster is one W x H scene cut
+into rows; rows with links are cut further into tiles so each card or button is
+its own link. The "GitHub Stats" row is not built here: gen_stats.py renders it
+every few minutes from live data (see .github/workflows/stats.yml).
 """
+import math
 import os
-import random
 
-from svgkit import (ASSETS, C, HERE, MARGIN, W, Scene, brand_icon, cap, esc, fit, fmt, github_mark, icon, line,
-                    poly, poster_bg, rect, section_title, text, tw, write)
+from svgkit import (ASSETS, C, H, HERE, W, Scene, brand_icon, cap, esc, fmt, github_mark, icon, line, logo, moon,
+                    poly, poster_bg, raster, rect, section_title, strokes, text, tw, write)
 
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
+ART = os.path.join(HERE, "art")
 USER = "MaiCoderHoon"
 GH = f"https://github.com/{USER}"
 LINKS = {
@@ -21,611 +23,427 @@ LINKS = {
     "repos": f"{GH}?tab=repositories",
     "omni": f"{GH}?tab=repositories",        # Omni KIIT has no public repo yet; swap in its URL when it does
     "smartschedule": f"{GH}/SmartSelector",
-    "rootrunner": f"{GH}/RootRunner",
     "email": "mailto:piyush993bisoi@outlook.com",
     "linkedin": "https://www.linkedin.com/in/piyush-bisoi",
-    "portfolio": f"{GH}?tab=repositories",   # swap in a portfolio site when there is one
     "github": GH,
 }
+# Rebuilt every few minutes by .github/workflows/stats.yml and published to the `output` branch.
+STATS_URL = f"https://raw.githubusercontent.com/{USER}/{USER}/output/stats.svg"
+STATS_ROW = (1900, 2205)  # must match Y0, Y1 in gen_stats.py
 
-PROJECTS = [  # "short" = hero panel copy, "long" = selected-work card copy (one list item per line)
-    {"key": "omni", "name": "Omni KIIT", "short": ["Campus super-app", "for KIIT students."],
-     "long": ["A campus super-app", "for KIIT students."], "file": "card-omni-kiit.svg"},
-    {"key": "smartschedule", "name": "SmartSchedule", "short": ["AI-driven section", "optimizer."],
-     "long": ["AI-driven academic", "section optimizer."], "file": "card-smartschedule.svg"},
-    {"key": "rootrunner", "name": "RootRunner", "short": ["Iterative DNS", "resolution engine."],
-     "long": ["Iterative DNS", "resolution engine", "in Python."], "file": "card-rootrunner.svg"},
+ROLES = ["Designer", "Developer", "Builder"]
+HEADLINE = ["Designing & Building", "Digital Products", "That Matter."]
+INTRO = ["Product designer & developer, building useful,",
+         "delightful and impactful digital products for",
+         "students, creators and real-world problems."]
+FACTS = [("map_pin", ["Bhubaneswar,", "India"]), ("grad_cap", ["KIIT", "University"]), ("calendar", ["3rd", "Year"])]
+CHIPS = [("envelope", "Product Design"), ("code", "Full-Stack Dev"), ("sun", "AI/ML")]
+NOTES = [  # "Currently building" sticky notes
+    {"key": "omni", "name": "Omni KIIT", "lines": ["Campus super-app", "for KIIT students."]},
+    {"key": "smartschedule", "name": "SmartSchedule", "lines": ["AI-driven academic", "section optimizer."]},
+]
+MORE = [  # "More projects" list (the whole list links to the repositories tab)
+    {"name": "RootRunner", "desc": "Iterative DNS resolution engine."},
+    {"name": "ScamBust", "desc": "AI-powered scam detection."},
+    {"name": "Price Prediction", "desc": "Market price prediction using ML."},
+    {"name": "Wakewise", "desc": "Habit-aware smart alarm."},
+]
+APPROACH = [("lightbulb", "#FDB0DD", "Discover", ["Understand", "the problem."]),
+            ("pencil", "#DDB9FD", "Design", ["Explore &", "shape solutions."]),
+            ("code", "#CFAAFC", "Build", ["Turn ideas", "into reality."]),
+            ("refresh", C["lime"], "Iterate", ["Improve with", "real feedback."])]
+TOOLKIT = [["python", "postgresql", "kotlin", "java", "cpp", "c"],
+           ["flutter", "jetpackcompose", "fastapi", "pandas", "scikitlearn", "figma"]]
+TOOL_NAMES = {"python": "Python", "postgresql": "PostgreSQL", "kotlin": "Kotlin", "java": "Java", "cpp": "C++",
+              "c": "C", "flutter": "Flutter", "jetpackcompose": "Jetpack Compose", "fastapi": "FastAPI",
+              "pandas": "pandas", "scikitlearn": "scikit-learn", "figma": "Figma"}
+BUTTONS = [("email", "Email", 87, 190), ("linkedin", "LinkedIn", 293, 209), ("github", "GitHub", 518, 199)]
+
+
+
+def hv(size):
+    """Extra outline for heavy headings, to match the mockup's black weight without closing up counters."""
+    return size * 0.02
+
+
+DEFS = [
+    '<filter id="paper-shadow" x="-12%" y="-12%" width="126%" height="130%">'
+    '<feDropShadow dx="-3" dy="7" stdDeviation="3" flood-color="#5E5650" flood-opacity=".34"/></filter>',
+    '<filter id="soft-shadow" x="-15%" y="-15%" width="130%" height="140%">'
+    '<feDropShadow dx="0" dy="3" stdDeviation="3.5" flood-color="#5B4335" flood-opacity=".13"/></filter>',
+    '<linearGradient id="lime-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#EDFD8E"/>'
+    '<stop offset=".3" stop-color="#E2FC5C"/><stop offset="1" stop-color="#DCF94C"/></linearGradient>',
+    '<linearGradient id="pink-paper" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FEB4E0"/>'
+    '<stop offset=".35" stop-color="#FDA2D9"/><stop offset="1" stop-color="#FC9BD5"/></linearGradient>',
+    '<linearGradient id="ring-top" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FAFAFA"/>'
+    '<stop offset=".55" stop-color="#C9C9C9"/><stop offset="1" stop-color="#8C8C8C"/></linearGradient>',
 ]
 
-# Rebuilt every 10 minutes by .github/workflows/stats.yml and published to the `output` branch.
-STATS_URL = f"https://raw.githubusercontent.com/{USER}/{USER}/output/stats.svg"
 
-HERO_ALT = ("Piyush — designing and building digital products that matter. Product-minded designer and developer. "
-            "Currently building Omni KIIT, SmartSchedule and RootRunner.")
+def g(svg, x=0, y=0, angle=0, sx=1, sy=1, skew=0, extra=""):
+    """Wrap svg drawn around the origin: scale, skew, rotate (degrees), then move to (x, y)."""
+    t = f"translate({fmt(x)} {fmt(y)})"
+    if angle:
+        t += f" rotate({fmt(angle)})"
+    if skew:
+        t += f" skewX({fmt(skew)})"
+    if sx != 1 or sy != 1:
+        t += f" scale({sx:.4f} {sy:.4f})"
+    return f'<g transform="{t}"{extra}>{svg}</g>'
 
-WHITE = "#FFFFFF"
-SOFT_WHITE = "#D4D4D4"
+
+def hand(s, x, y, width, angle, color, weight=2.0, sx=0.9, skew=-7):
+    """Handwritten text (Kalam) `width` units wide, thickened with a matching outline, rotated about its start."""
+    size = width / (sx * tw("hand", s, 1))
+    body = text("hand", s, 0, 0, size, color, heavy=weight / sx)
+    return g(body, x, y, angle, sx, 1, skew)
 
 
-# ------------------------------------------------------------------ marks & logos
+def slash(x, baseline, h, w=12, lean=12):
+    return poly([(x + lean, baseline - h), (x + lean + w, baseline - h), (x + w, baseline), (x, baseline)], C["pink"])
 
-def pixel_mark(x, y, s, main, accent, dark=None):
-    """The MaiCoderHoon / Omni pixel monogram in an s x s box."""
-    u = s / 4
+
+def arrow_ur(left, bottom, length, sw=4.4):
+    """A north-east arrow whose visible shape is `length` units square, its bottom-left corner at (left, bottom)."""
+    size = length * 2.4  # the Lucide glyph spans 10 of its 24 units
+    return icon("arrow_up_right", left - size * 7 / 24, bottom - size * 17 / 24, size, C["ink"], sw)
+
+
+def swoosh(x0, y0, cx, cy, x1, y1, w0, w1, color):
+    """A brush stroke along a quadratic curve, tapering from width w0 to w1."""
+    top, bot = [], []
+    n = 16
+    for i in range(n + 1):
+        t = i / n
+        px = (1 - t) ** 2 * x0 + 2 * (1 - t) * t * cx + t * t * x1
+        py = (1 - t) ** 2 * y0 + 2 * (1 - t) * t * cy + t * t * y1
+        dx = 2 * (1 - t) * (cx - x0) + 2 * t * (x1 - cx)
+        dy = 2 * (1 - t) * (cy - y0) + 2 * t * (y1 - cy)
+        ln = math.hypot(dx, dy)
+        hw = (w0 + (w1 - w0) * t) / 2
+        top.append((px + dy / ln * hw, py - dx / ln * hw))
+        bot.append((px - dy / ln * hw, py + dx / ln * hw))
+    return poly(top + bot[::-1], color, extra=f' stroke="{color}" stroke-width="2" stroke-linejoin="round"')
+
+
+def rings(cx, cy, s):
+    """RootRunner's stacked-disc mark, centred at (cx, cy) in an s-wide box."""
     out = []
-    solid = [(0, 0), (0, 1), (0, 2), (0, 3), (2, 0), (3, 0), (1, 3), (2, 3)]
-    soft = [(2, 1), (1, 2)]
-    for cx, cy in solid:
-        out.append(rect(x + cx * u, y + cy * u, u + 0.3, u + 0.3, main))
-    for cx, cy in soft:
-        out.append(rect(x + cx * u, y + cy * u, u + 0.3, u + 0.3, accent))
-    tri = dark or main
-    out.append(poly([(x + 2 * u, y + 2 * u), (x + 3 * u, y + 3 * u), (x + 2 * u, y + 3 * u)], tri))
+    rx, ry = s * 0.44, s * 0.15
+    for i in (2, 1, 0):
+        y = cy - s * 0.3 + i * s * 0.24
+        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(y + s * 0.075)}" rx="{fmt(rx)}" ry="{fmt(ry)}" fill="#4E4E4E"/>')
+        out.append(rect(cx - rx, y, 2 * rx, s * 0.075, "#6E6E6E"))
+        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(y)}" rx="{fmt(rx)}" ry="{fmt(ry)}" fill="url(#ring-top)"/>')
+        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(y)}" rx="{fmt(rx * 0.45)}" ry="{fmt(ry * 0.45)}" fill="#3B3B3B"/>')
     return "".join(out)
 
 
-def smart_logo(x, y, s):
-    u = s / 54
-    out = rect(x, y, s, s, C["lime"], rx=11 * u)
-    out += poly([(x + 15 * u, y + 18 * u), (x + 15 * u, y + 39 * u), (x + 36 * u, y + 39 * u)], C["ink"])
-    out += rect(x + 29 * u, y + 17 * u, 9 * u, 9 * u, C["ink"])
+def bars(x, y, s, color):
+    """Price-prediction mark: three rising columns on a base line, in an s x s box at (x, y)."""
+    k = s / 80
+    sw = 5.4
+    out = strokes([((x + 2 * k, y + 76 * k), (x + 78 * k, y + 76 * k))], color, sw)
+    for bx, top in ((8, 50), (30, 30), (54, 6)):
+        out += rect(x + bx * k, y + top * k, 16 * k, (74 - top) * k, C["bg"], stroke=color, sw=sw, rx=1.5)
+    out += strokes([((x + 10 * k, y + 32 * k), (x + 10 * k, y + 44 * k)), ((x + 4 * k, y + 38 * k), (x + 16 * k, y + 38 * k))],
+                   color, 4.2)
     return out
 
 
-def rings_logo(x, y, s, grad="ringTop"):
-    out = []
-    rx, ry = s * 0.44, s * 0.155
-    cx = x + s / 2
-    for i in (2, 1, 0):
-        cy = y + s * 0.27 + i * s * 0.23
-        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(cy + s * 0.07)}" rx="{fmt(rx)}" ry="{fmt(ry)}" fill="#5E5E5E"/>')
-        out.append(f'<rect x="{fmt(cx - rx)}" y="{fmt(cy)}" width="{fmt(2 * rx)}" height="{fmt(s * 0.07)}" fill="#7A7A7A"/>')
-        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(cy)}" rx="{fmt(rx)}" ry="{fmt(ry)}" fill="url(#{grad})"/>')
-        out.append(f'<ellipse cx="{fmt(cx)}" cy="{fmt(cy)}" rx="{fmt(rx * 0.46)}" ry="{fmt(ry * 0.46)}" fill="#3B3B3B"/>')
-    return "".join(out)
+def sparkle(cx, cy, s):
+    """Four-point twinkle with a warm centre (the star on the Omni KIIT note)."""
+    r, n = s / 2, s * 0.09
+    pts = []
+    for i in range(8):
+        a = math.radians(i * 45 - 90)
+        rr = r if i % 2 == 0 else n
+        pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
+    star = poly(pts, "#FFE7CF", extra=' stroke="#2E211A" stroke-width="2.6" stroke-linejoin="round"')
+    return star + f'<circle cx="{fmt(cx)}" cy="{fmt(cy)}" r="{fmt(s * 0.11)}" fill="#F9B7D9"/>'
 
 
-RING_GRAD = ('<linearGradient id="ringTop" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#FAFAFA"/>'
-             '<stop offset=".55" stop-color="#C9C9C9"/><stop offset="1" stop-color="#8C8C8C"/></linearGradient>')
+def lang_letter(kind, cx, cy, s):
+    """C and C++ marks drawn as heavy letterforms, as on the mockup's toolkit tiles."""
+    if kind == "c":
+        size = s * 1.1
+        return text("display", "C", cx, cy + cap("display", size) / 2, size, "#22409A", anchor="middle", heavy=2)
+    size = s * 1.0
+    w = tw("display", "C", size)
+    pw, pt, gap = s * 0.27, s * 0.095, s * 0.02
+    x0 = cx - (w + 2 * (pw + gap)) / 2
+    out = text("display", "C", x0, cy + cap("display", size) / 2, size, "#1F7AE0", heavy=2)
+    px = x0 + w + gap
+    for _ in range(2):
+        out += rect(px, cy - pt / 2, pw, pt, "#1F7AE0") + rect(px + pw / 2 - pt / 2, cy - pw / 2, pt, pw, "#1F7AE0")
+        px += pw + gap
+    return out
 
 
-def project_logo(key, x, y, s):
-    if key == "omni":
-        return pixel_mark(x + s * 0.06, y + s * 0.06, s * 0.88, "#F2F2F2", "#B9B9B9", dark=C["ink"])
-    if key == "smartschedule":
-        return smart_logo(x, y, s)
-    return rings_logo(x, y, s)
+# ------------------------------------------------------------------ sections
+
+def header(sc):
+    sc.region = (0, W, 0, 110)
+    sc.add(logo(72, 43, 60, C["ink"]))
+    sc.add(line(248, 46, 248, 100, "#CFC7BE", 2.4))
+    sc.add(text("display", USER, 280, 86, 40.3, C["ink"], ls=-0.02, heavy=hv(40.3)))
+    size, gap = 29.7, 34
+    total = sum(tw("semi", r, size) for r in ROLES) + (len(ROLES) - 1) * (2 * gap + 24)
+    x = 1647 - total
+    for i, role in enumerate(ROLES):
+        if i:
+            sc.add(slash(x + gap, 76, 23))
+            x += 2 * gap + 24
+        sc.add(text("semi", role, x, 76, size, C["text"]))
+        x += tw("semi", role, size)
 
 
-#  Toolkit tiles, taken from the resume: languages on top, frameworks / ML / tools below.
-#  (label, logo file in brand-icons/ or "sql" for the generic database icon)
-TOOLKIT = [
-    [("Python", "python"), ("SQL", "sql"), ("Kotlin", "kotlin"), ("Java", "java"), ("C++", "cplusplus"),
-     ("Dart", "dart"), ("C", "c")],
-    [("Flutter", "flutter"), ("Compose", "jetpackcompose"), ("FastAPI", "fastapi"), ("Pandas", "pandas"),
-     ("scikit-learn", "scikitlearn"), ("Figma", "figma"), ("Git", "git")],
-]
+def hero(sc):
+    sc.region = (0, W, 110, 1000)
+    sc.add(raster(os.path.join(ART, "workspace.webp"), 678, 112, 1078, 876), 678, 1756, 112, 988)
+
+    sc.add(hand("Hi, I’m", 92, 250, 206, -12, C["pink"], 1.6))
+    sc.add(strokes(["M331 150L321 172", "M337 181L368 171", "M340 199L366 204"], C["pink"], 4.8))
+    size = 345 / tw("displayi", "Piyush", 1, -0.01)
+    sc.add(g(text("displayi", "Piyush", 0, 0, size, C["ink"], ls=-0.01, heavy=3.2), 160, 326, -6.2))
+    sc.add(swoosh(240, 362, 372, 334, 523, 316, 16, 5, C["pink"]))
+    sc.add(strokes(["M560 274L546 294", "M562 303L593 293", "M565 322L588 331"], C["pink"], 4.8))
+
+    hs = 67.5
+    sc.add(text("display", HEADLINE[0], 105, 446, hs, C["ink"], ls=-0.02, heavy=hv(hs)))
+    sc.add(text("display", HEADLINE[1], 105, 518, hs, C["ink"], ls=-0.02, heavy=hv(hs)))
+    hs = 72
+    hw = tw("display", HEADLINE[2], hs, -0.02)
+    sc.add(rect(92, 537, hw + 44, 79, C["pink"], rx=12))
+    sc.add(text("display", HEADLINE[2], 110, 603, hs, C["ink"], ls=-0.02, heavy=hv(hs)))
+    sc.add(strokes(["M606 577L612 592L625 575", "M641 563L669 560L660 580"], C["pink"], 5.4))
+
+    for i, s in enumerate(INTRO):
+        sc.add(text("body", s, 104, 673 + i * 38.5, 29.5, C["text"], heavy=0.4))
+
+    for (ic, lines), ix, tx in zip(FACTS, (97, 380, 658), (160, 454, 734)):
+        isz = 48 if ic == "grad_cap" else 43
+        sc.add(icon(ic, ix, 831 - isz / 2, isz, C["ink"], 3.8))
+        for j, s in enumerate(lines):
+            sc.add(text("body", s, tx, 829 + j * 35, 24, C["text"], heavy=0.4))
+
+    x = 100
+    for ic, label in CHIPS:
+        w = 77 + tw("semi", label, 22.3) + 28
+        sc.add(rect(x, 908, w, 58, C["card"], rx=29, stroke=C["chip_line"], sw=2.2))
+        sc.add(icon(ic, x + 28, 937 - 16, 32, C["ink"], 3.3))
+        sc.add(text("semi", label, x + 77, 937 + cap("semi", 22.3) / 2, 22.3, C["ink"], heavy=0.3))
+        x += w + 27
 
 
-def checker(x, y, cell, n, colors, flip=False):
-    """Pink stair-step checker; bottom-right aligned staircase."""
-    out = []
-    for r in range(n):
-        for c in range(n - 1 - r, n):
-            if (r + c) % 2 == (n - 1) % 2:
-                col = colors[0]
-            else:
-                if len(colors) < 2:
-                    continue
-                col = colors[1]
-            out.append(rect(x + c * cell, y + r * cell, cell + 0.2, cell + 0.2, col))
-    return "".join(out)
+def sticky_note(cx, cy, w, h, angle, paper, fold_color, fold, tape_dx, content):
+    """A taped sticky note centred at (cx, cy); `content` is drawn in the note's own frame (origin = centre)."""
+    f = 34
+    l, t, r, b = -w / 2, -h / 2, w / 2, h / 2
+    flaps = []
+    if fold == "top-right":
+        shape = [(l, t), (r - f, t), (r, t + f), (r, b), (l, b)]
+        flaps.append([(r - f, t), (r - f + 3, t + f - 3), (r, t + f)])
+    else:
+        f2 = 22
+        shape = [(l + f2, t), (r, t), (r, b - f), (r - f, b), (l, b), (l, t + f2)]
+        flaps.append([(r, b - f), (r - f + 3, b - f + 3), (r - f, b)])
+        flaps.append([(l + f2, t), (l + f2 - 2, t + f2 - 2), (l, t + f2)])
+    paper_svg = poly(shape, f"url(#{paper})", extra=' filter="url(#paper-shadow)"')
+    flap_svg = "".join(poly(fl, fold_color, extra=' stroke="#0000001A" stroke-width="1.5" stroke-linejoin="round"')
+                       for fl in flaps)
+    tape = (rect(-21, -30, 42, 60, C["tape"], rx=2) + rect(-21, -30, 42, 7, "#47444A") +
+            rect(-21, 23, 42, 7, "#232124"))
+    body = paper_svg + flap_svg + content + g(tape, tape_dx, t + 2, -2)
+    return g(body, cx, cy, angle)
 
 
-# ------------------------------------------------------------------ rows
-
-# Every exported strip is at least MIN_STRIP units tall: GitHub lays the strips out as
-# lines of text, and a strip shorter than one line-height (24px) would leave a gap
-# under it on narrow (320px+) screens.
-MIN_STRIP = 116
+def note_tile(cx, cy, w, h):
+    return rect(cx - w / 2, cy - h / 2, w, h, C["tile_dark"], rx=18) + logo(cx - 33.75, cy - 15, 30, C["white"])
 
 
-def row_nav():
-    h = MIN_STRIP
-    sc = Scene(h)
-    sc.add(poster_bg(W, h, top=True))
-    cy = 62
-    sc.add(rect(MARGIN, cy - 22, 44, 44, C["ink"], rx=7) + pixel_mark(MARGIN + 9, cy - 13, 26, C["pink"], C["pink_pale"]), 0, 120)
-    bsize = 27
-    bx = MARGIN + 60
-    sc.add(text("display", "MaiCoderHoon", bx, cy + cap("display", bsize) / 2, bsize, C["ink"], ls=-0.02), 0, 400)
-    brand_end = bx + tw("display", "MaiCoderHoon", bsize, -0.02)
+def projects(sc):
+    y0, y1 = 1010, 1530
+    sc.region = (0, W, y0, y1)
+    sc.add(section_title(77, 1083, "Currently Building"), 0, 967, y0, 1110)
+    sc.add(section_title(1017, 1083, "More Projects"), 967, W, y0, 1110)
+    sc.add(line(967, 1050, 967, 1503, C["rule"], 2), 960, 975, y0, y1)
 
-    ax = W - MARGIN - 44
-    sc.add(rect(ax, cy - 22, 44, 44, C["pink"], rx=4) + icon("arrow_up_right", ax + 8, cy - 14, 28, C["ink"], 2.6), ax - 5, W)
+    # sticky notes
+    omni, smart = NOTES
+    c = note_tile(-95, -79, 100, 84) + sparkle(111, -91, 52)
+    c += text("display", omni["name"], -135, 16, 39, C["ink"], ls=-0.02, heavy=hv(39))
+    c += arrow_ur(-135 + tw("display", omni["name"], 39, -0.02) + 14, 14, 23)
+    for i, s in enumerate(omni["lines"]):
+        c += text("body", s, -134, 66 + i * 37, 28.5, C["ink"], heavy=0.4)
+    sc.add(sticky_note(281, 1328, 371, 336, -3.9, "lime-paper", "#F4FEC4", "top-right", -6, c), 40, 500, 1100, y1)
 
-    labels = ["ABOUT", "PROJECTS", "TOOLKIT", "NOW", "CONNECT"]
-    nsize, ls, gap = 18, 0.02, 20
-    slash_w = tw("semi", "/", nsize)
-    widths = [tw("semi", s, nsize, ls) for s in labels]
-    total = sum(widths) + (len(labels) - 1) * (2 * gap + slash_w)
-    x = ax - 34 - total
-    base = cy + cap("semi", nsize) / 2
-    starts = []
-    for i, (label, w) in enumerate(zip(labels, widths)):
-        starts.append(x)
-        sc.add(text("semi", label, x, base, nsize, C["ink"], ls=ls), x - 2, x + w + 2)
-        x += w
-        if i < len(labels) - 1:
-            sc.add(text("semi", "/", x + gap, base, nsize, C["ink"]), x + gap - 2, x + gap + slash_w + 2)
-            x += 2 * gap + slash_w
-    sc.add(line(brand_end + 26, cy, starts[0] - 30, cy, C["ink"], 1.6), brand_end, starts[0])
+    c = note_tile(-107, -88, 100, 82)
+    c += text("displayi", smart["name"], -150, 12, 36, C["ink"], ls=-0.02, heavy=hv(36))
+    c += arrow_ur(-150 + tw("displayi", smart["name"], 36, -0.02) + 14, 12, 23)
+    for i, s in enumerate(smart["lines"]):
+        c += text("body", s, -148, 65 + i * 40, 28.5, C["ink"], heavy=0.4)
+    sc.add(sticky_note(703, 1338, 386, 316, 3.7, "pink-paper", "#FED3EC", "bottom-right", 26, c), 480, 960, 1100, y1)
+    sc.add(strokes(["M833 1123L834 1139", "M872 1109L854 1142", "M893 1137L868 1151"], C["ink"], 4.8),
+           820, 900, 1100, 1160)
 
-    b = [0] + [starts[0] - 15] + [s - gap / 2 for s in starts[1:]] + [W]
-    targets = [("nav-brand.svg", LINKS["profile"], "MaiCoderHoon"),
-               ("nav-about.svg", "#about", "About"),
-               ("nav-projects.svg", "#projects", "Projects"),
-               ("nav-toolkit.svg", "#toolkit", "Toolkit"),
-               ("nav-now.svg", "#now", "Now"),
-               ("nav-connect.svg", "#connect", "Connect")]
-    return sc, [(f, b[i], b[i + 1], href, alt) for i, (f, href, alt) in enumerate(targets)]
-
-
-def building(sc):
-    """Grayscale concrete building corner on a pink stepped backdrop."""
-    AX, AY, LX, RX, BOT, SL = 738, 14, 572, 832, 418, 1.1
-    rnd = random.Random(7)
-    out = []
-    # pink stepped backdrop
-    out.append(poly([(668, 48), (RX, 48), (RX, BOT), (572, BOT), (572, 162), (600, 162), (600, 124),
-                     (634, 124), (634, 86), (668, 86)], C["pink"]))
-
-    def lp(u, v):
-        return (AX - u * (AX - LX), AY + u * (AX - LX) * SL + v)
-
-    def rp(u, v):
-        return (AX + u * (RX - AX), AY + u * (RX - AX) * SL + v)
-
-    left_face = [lp(0, 0), lp(1, 0), (LX, BOT), (AX, BOT)]
-    right_face = [rp(0, 0), rp(1, 0), (RX, BOT), (AX, BOT)]
-    sc.defs.append('<clipPath id="bldg"><path d="M' + "L".join(f"{fmt(x)} {fmt(y)}" for x, y in
-                   [lp(1, 0), lp(0, 0), rp(1, 0), (RX, BOT), (LX, BOT)]) + 'Z"/></clipPath>')
-    sc.defs.append('<linearGradient id="lface" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#B4B2AE"/>'
-                   '<stop offset="1" stop-color="#9A9894"/></linearGradient>')
-    sc.defs.append('<linearGradient id="rface" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3A3A3A"/>'
-                   '<stop offset="1" stop-color="#262626"/></linearGradient>')
-    sc.defs.append('<linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4A4F55"/>'
-                   '<stop offset=".5" stop-color="#202326"/><stop offset="1" stop-color="#383C41"/></linearGradient>')
-    sc.defs.append('<linearGradient id="band" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#0C0C0C"/>'
-                   '<stop offset="1" stop-color="#3A3A3A"/></linearGradient>')
-    sc.defs.append('<filter id="grain" x="0" y="0" width="1" height="1"><feTurbulence type="fractalNoise" baseFrequency=".85" '
-                   'numOctaves="2" seed="4"/><feColorMatrix type="matrix" values="0 0 0 0 .12  0 0 0 0 .12  0 0 0 0 .12  0 0 0 -2.2 1.12"/></filter>')
-
-    g = ['<g clip-path="url(#bldg)">']
-    g.append(poly(left_face, "url(#lface)"))
-    g.append(poly(right_face, "url(#rface)"))
-
-    def panels(pt, cols, v_rows, tone, skip=None):
-        res = []
-        for i in range(cols):
-            u0, u1 = i / cols, (i + 1) / cols
-            for v0, v1 in v_rows:
-                if skip and skip(u0, u1, v0, v1):
-                    continue
-                t = tone + rnd.randint(-9, 9)
-                col = f"#{t:02X}{t:02X}{max(0, t - 3):02X}"
-                gp = 1.3
-                a, b2 = pt(u0, v0 + gp), pt(u1, v0 + gp)
-                c2, d2 = pt(u1, v1 - gp), pt(u0, v1 - gp)
-                inset = 1.1
-                res.append(poly([(a[0] - inset if pt is lp else a[0] + inset, a[1]),
-                                 (b2[0] + inset if pt is lp else b2[0] - inset, b2[1]),
-                                 (c2[0] + inset if pt is lp else c2[0] - inset, c2[1]),
-                                 (d2[0] - inset if pt is lp else d2[0] + inset, d2[1])], col))
-        return res
-
-    band = (150, 180)
-    upper = [(v, v + 37.5) for v in (0, 37.5, 75, 112.5)]
-    lower = [(v, v + 38) for v in range(180, 420, 38)]
-    # left face: light concrete panels, windows lower-left, recessed doorway
-    g += panels(lp, 5, upper, 0xE2)
-    g += panels(lp, 5, lower, 0xD9, skip=lambda u0, u1, v0, v1: (u0 >= 0.6 and v0 >= 218) or (0.2 <= u0 < 0.6 and v0 >= 332))
-    # right face: dark panels
-    g += panels(rp, 3, upper, 0x5C)
-    g += panels(rp, 3, lower, 0x55, skip=lambda u0, u1, v0, v1: u0 >= 0.33 and 218 <= v0 < 294)
-    # recessed band across both faces
-    g.append(poly([lp(0, band[0]), lp(1, band[0]), lp(1, band[1]), lp(0, band[1])], "url(#band)"))
-    g.append(poly([rp(0, band[0]), rp(1, band[0]), rp(1, band[1]), rp(0, band[1])], "#141414"))
-    # glazing
-    g.append(poly([lp(0.6, 218), lp(1, 218), lp(1, 420), lp(0.6, 420)], "url(#glass)"))
-    for u in (0.68, 0.76, 0.84, 0.92):
-        a, b2 = lp(u, 218), lp(u, 420)
-        g.append(line(a[0], a[1], b2[0], b2[1], "#B9B9B9", 1.1))
-    a, b2 = lp(0.6, 300), lp(1, 300)
-    g.append(line(a[0], a[1], b2[0], b2[1], "#9C9C9C", 1))
-    g.append(poly([lp(0.2, 332), lp(0.6, 332), lp(0.6, 420), lp(0.2, 420)], "#1B1C1E"))
-    a = lp(0.4, 332)
-    g.append(line(a[0], a[1], a[0], BOT, "#5A5A5A", 1))
-    g.append(poly([rp(0.33, 218), rp(1, 218), rp(1, 294), rp(0.33, 294)], "#111214"))
-    for u in (0.55, 0.78):
-        a, b2 = rp(u, 218), rp(u, 294)
-        g.append(line(a[0], a[1], b2[0], b2[1], "#4C4C4C", 1))
-    # light grain
-    g.append(f'<rect x="{LX}" y="{AY}" width="{RX - LX}" height="{BOT - AY}" filter="url(#grain)" opacity=".22"/>')
-    g.append('</g>')
-    out += g
-    # crisp edges
-    out.append(f'<path d="M{fmt(lp(1, 0)[0])} {fmt(lp(1, 0)[1])}L{AX} {AY}L{fmt(rp(1, 0)[0])} {fmt(rp(1, 0)[1])}" '
-               f'fill="none" stroke="#141414" stroke-width="1.4" stroke-linejoin="round"/>')
-    out.append(line(AX, AY, AX, BOT, "#F4F4F4", 1.1, ' stroke-opacity=".55"'))
-    # pink checker + crosshair
-    out.append(checker(RX - 4 * 14, BOT - 4 * 14, 14, 4, [C["pink"], C["pink_pale"]]))
-    cx, cy = 590, 60
-    out.append(f'<circle cx="{cx}" cy="{cy}" r="11" fill="none" stroke="{C["ink"]}" stroke-width="1.6"/>')
-    out.append(line(cx - 25, cy, cx + 25, cy, C["ink"], 1.6) + line(cx, cy - 25, cx, cy + 25, C["ink"], 1.6))
-    return "".join(out)
+    # more projects
+    marks = [lambda cy: rings(1100, cy, 76),
+             lambda cy: icon("shield_check", 1062, cy - 38, 76, C["ink"], 5.4),
+             lambda cy: bars(1060, cy - 40, 80, C["ink"]),
+             lambda cy: moon(1064, cy - 38, 76, C["ink"])]
+    for i, (p, mark) in enumerate(zip(MORE, marks)):
+        base = 1148 + i * 103.4
+        top, bot = (1112, 1206, 1311, 1416)[i], (1206, 1311, 1416, 1530)[i]
+        sc.add(mark(base + 10), 1040, 1160, top, bot)
+        sc.add(text("display", p["name"], 1182, base, 29.5, C["ink"], ls=-0.015, heavy=hv(29.5)), 1170, 1600, top, bot)
+        sc.add(arrow_ur(1182 + tw("display", p["name"], 29.5, -0.015) + 14, base - 1, 19, 4.2), 1170, 1600, top, bot)
+        sc.add(text("body", p["desc"], 1182, base + 35, 24.5, C["text"], heavy=0.4), 1170, 1650, top, bot)
+        sc.add(arrow_ur(1674, base + 13, 26, 4.4), 1660, 1710, top, bot)
+        if i < 3:
+            sc.add(line(1182, bot, 1707, bot, C["line"], 2.2), 1170, 1710, bot - 3, bot + 3)
 
 
-def row_hero():
-    """Hero plus the SELECTED WORK heading; cropped into a top strip and a two-slice bottom strip."""
-    h = 440 + 80
-    sc = Scene(h)
-    sc.add(poster_bg(W, h))
-    sc.defs.append(RING_GRAD)
-    # pixel deco
-    u = 9
-    for ch, i, j in [("K", 0, 0), ("P", 3, 0), ("K", 1, 1), ("P", 2, 1), ("P", 3, 1), ("K", 0, 2), ("P", 1, 2),
-                     ("K", 2, 2), ("K", 0, 3), ("K", 1, 3), ("K", 0, 4)]:
-        sc.add(rect(42 + i * u, 26 + j * u, u + 0.2, u + 0.2, C["ink"] if ch == "K" else C["pink"]), y1=80)
+def approach_toolkit(sc):
+    y0, y1 = 1530, 1900
+    sc.region = (0, W, y0, y1)
+    sc.add(line(72, 1543, 1707, 1543, C["line"], 2.4))
+    sc.add(line(72, 1893, 1707, 1893, C["line"], 2.4))
+    sc.add(section_title(77, 1615, "My Approach"))
+    sc.add(section_title(1019, 1615, "Toolkit"))
+    sc.add(line(970, 1585, 970, 1848, C["rule"], 2))
 
-    # headline
-    hx, left = 98, 88
-    lines = ["DESIGNING &", "BUILDING", "DIGITAL PRODUCTS", "THAT MATTER."]
-    hls = -0.035
-    hs = min(fit("display", s, 62, 562 - hx, hls) for s in lines)
-    ch = cap("display", hs)
-    lh = hs * 0.9
-    bases = [48 + ch + i * lh for i in range(4)]
-    bases[3] += 6
-    w4 = tw("display", lines[3], hs, hls)
-    sc.add(rect(left, bases[3] - ch - 8, hx - left + w4 + 10, ch + 17, C["pink"]), y1=bases[3] + 12)
-    for s, b in zip(lines, bases):
-        sc.add(text("display", s, hx, b, hs, C["ink"], ls=hls), y1=b + 12)
+    for i, (ic, color, label, lines) in enumerate(APPROACH):
+        x = (79, 309, 534, 761)[i]
+        cx = x + 63
+        sc.add(rect(x, 1645, 126, 95, color, rx=20))
+        sc.add(icon(ic, cx - 27, 1692 - 27, 54, C["ink"], 4))
+        if i < 3:
+            sc.add(icon("arrow_right", (258, 482, 709)[i] - 26, 1694 - 26, 52, C["ink"], 4))
+        sc.add(text("display", label, cx, 1783, 29.3, C["ink"], anchor="middle", ls=-0.01, heavy=hv(29.3)))
+        for j, s in enumerate(lines):
+            sc.add(text("body", s, cx, 1816 + j * 30, 23.2, C["text"], anchor="middle", heavy=0.4))
 
-    sub = ["Product-minded designer & developer, turning ideas", "into useful, delightful and impactful products."]
-    ss = min(fit("body", s, 20.5, 560 - left) for s in sub)
-    sb = bases[3] + 52
-    for i, s in enumerate(sub):
-        sc.add(text("body", s, left, sb + i * ss * 1.38, ss, C["text"]), y1=sb + i * ss * 1.38 + 8)
-
-    # pills
-    pills = [("Product Design", "box", True), ("Full-Stack Dev", "code", False), ("AI/ML", "sparkles", False)]
-    ps, ph, pad, isz, gap = 17.5, 44, 17, 20, 12
-
-    def pill_w(label, size):
-        return pad + isz + 9 + tw("semi", label, size) + pad
-
-    while sum(pill_w(p[0], ps) for p in pills) + gap * 2 > 560 - left:
-        ps -= 0.25
-    px, py = left, sb + ss * 1.38 + 26
-    for label, ic, filled in pills:
-        w = pill_w(label, ps)
-        fg = WHITE if filled else C["ink"]
-        sc.add(rect(px + 0.75, py + 0.75, w - 1.5, ph - 1.5, C["ink"] if filled else "none", rx=ph / 2,
-                    stroke=C["ink"], sw=1.5)
-               + icon(ic, px + pad, py + (ph - isz) / 2, isz, fg, 1.9)
-               + text("semi", label, px + pad + isz + 9, py + ph / 2 + cap("semi", ps) / 2, ps, fg), y0=py - 1, y1=py + ph + 1)
-        px += w + gap
-
-    sc.add(building(sc), 560, 860)
-    sc.add(line(858, 34, 858, 418, C["ink"], 1.5))
-
-    # name column
-    nx = 884
-    col = []
-    col.append(icon("arrow_up_right", nx - 4, 22, 34, C["ink"], 2.8))
-    col.append(text("display", "PIYUSH", nx + 40, 51, 34, C["ink"], ls=-0.01))
-    mono = ["Design, code, iterate,", "and ship – end to end."]
-    ms = min(fit("mono", s, 18, 1106 - nx) for s in mono)
-    for i, s in enumerate(mono):
-        col.append(text("mono", s, nx, 96 + i * 27, ms, C["text"]))
-    col.append(line(nx, 148, 1106, 148, C["ink"], 1.3))
-    focus = ["Product Thinking", "Interface Design", "Engineering", "User Experience", "Iteration & Impact"]
-    fs = min(fit("mono", s, 18.5, 1106 - nx - 31) for s in focus)
-    for i, s in enumerate(focus):
-        y = 192 + i * 38
-        col.append(rect(nx, y - cap("mono", fs) / 2 - 7, 14, 14, C["pink"]))
-        col.append(text("mono", s, nx + 31, y, fs, C["ink"]))
-    sc.add("".join(col), nx - 6, 1110, 0, 350)
-
-    # currently building panel
-    x0, y0, x1, y1, cut = 1128, 26, W - MARGIN, 418, 30
-    sc.add(poly([(x0, y0), (x1 - cut, y0), (x1, y0 + cut), (x1, y1), (x0, y1)], C["dark"]))
-    tsz = fit("display", "CURRENTLY BUILDING", 20, x1 - cut - 8 - (x0 + 58), 0.02)
-    sc.add(rect(x0 + 26, 70 - 17, 17, 17, C["lime"])
-           + text("display", "CURRENTLY BUILDING", x0 + 58, 70, tsz, WHITE, ls=0.02), x0, x1, 0, 80)
-    for i, p in enumerate(PROJECTS):
-        iy = 100 + i * 106
-        item = [project_logo(p["key"], x0 + 24, iy + 8, 54),
-                text("bold", p["name"], x0 + 96, iy + 28, 21, WHITE, ls=-0.01),
-                icon("arrow_up_right", x1 - 40, iy + 10, 24, WHITE, 2.2)]
-        for j, s in enumerate(p["short"]):
-            item.append(text("body", s, x0 + 96, iy + 53 + j * 21, 15.5, SOFT_WHITE))
-        if i < len(PROJECTS) - 1:
-            item.append(line(x0 + 96, iy + 96, x1 - 18, iy + 96, "#3A3A3A", 1.2))
-        sc.add("".join(item), x0, x1, iy, iy + 98)
-
-    # SELECTED WORK heading
-    ty = 440
-    sc.add(line(MARGIN, ty + 10, W - MARGIN, ty + 10, C["ink"], 1.5), y0=ty)
-    sc.add(section_title(MARGIN, ty + 60, "SELECTED WORK"), 0, 600, ty)
-    label, size = "VIEW ALL PROJECTS", 16.5
-    ax = W - MARGIN - 20
-    vx = ax - 8 - tw("semi", label, size, 0.02)
-    sc.add(text("semi", label, vx, ty + 60, size, C["ink"], ls=0.02)
-           + icon("arrow_up_right", ax, ty + 44, 20, C["ink"], 2.4), vx - 5, W, ty)
-    cut_y, cut_x = h - 120, vx - 24
-    assert cut_y - 0 >= MIN_STRIP and h - cut_y >= MIN_STRIP
-    return sc, [("hero.svg", 0, W, 0, cut_y, None, HERO_ALT)], [
-        ("work-title.svg", 0, cut_x, cut_y, h, None, "Selected work"),
-        ("work-all.svg", cut_x, W, cut_y, h, LINKS["repos"], "View all projects")]
-
-
-def phone(sc, x, y, angle):
-    sc.defs.append('<linearGradient id="omniImg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#E2C6FF"/>'
-                   '<stop offset="1" stop-color="#9C78EC"/></linearGradient>')
-    o = [f'<g transform="translate({fmt(x)} {fmt(y)}) rotate({angle} 94 170)">']
-    o.append(rect(0, 0, 188, 340, "#232326", rx=32, stroke="#55555B", sw=1.4))
-    o.append(rect(7, 7, 174, 326, "#0A0A0B", rx=26))
-    o.append(rect(66, 16, 56, 16, "#000", rx=8))
-    o.append(text("semi", "9:41", 22, 30, 12.5, WHITE))
-    for i, hh in enumerate((4, 6, 8, 10)):
-        o.append(rect(122 + i * 4, 29 - hh, 2.6, hh, WHITE, rx=0.6))
-    o.append('<path d="M141 22.5a9 9 0 0 1 12 0M143.5 25.5a5 5 0 0 1 7 0" fill="none" stroke="#FFF" stroke-width="1.6" stroke-linecap="round"/>'
-             '<circle cx="147.5" cy="28" r="1.4" fill="#FFF"/>')
-    o.append(rect(157, 21, 17, 9, "none", rx=2.5, stroke=WHITE, sw=1.2) + rect(158.8, 22.8, 11.5, 5.4, WHITE, rx=1))
-    sk = ' transform="translate(22 96) skewX(-10) translate(-22 -96)"'
-    o.append(f'<g{sk}>' + text("bold", "Good Morning,", 22, 96, 15, WHITE) + '</g>')
-    sk = ' transform="translate(22 122) skewX(-10) translate(-22 -122)"'
-    o.append(f'<g{sk}>' + text("display", "Student", 22, 122, 19.5, WHITE) + '</g>')
-    sw_ = tw("display", "Student", 19.5)
-    o.append(f'<path transform="translate({fmt(sw_ - 74)} 6)" d="M108 105c2-6 7-6 8-1l2-7c1-3 5-2 4 1l-1 5 3-8c1-3 5-2 4 1'
-             'l-3 9 3-5c2-2 5 0 3 3l-5 9c-3 5-9 6-13 3z" fill="#FFC83D"/>')
-    for yy in (82, 106):
-        o.append(rect(150, yy, 16, 16, "none", rx=4, stroke="#45D483", sw=1.4) + rect(155, yy + 5, 6, 6, "#45D483", rx=1))
-    o.append(rect(18, 146, 152, 190, "url(#omniImg)", rx=14))
-    o.append(poly([(26, 336), (26, 236), (46, 222), (46, 206), (58, 198), (70, 206), (70, 222), (90, 236), (90, 336)], "#7B57C8", ' opacity=".75"'))
-    o.append(poly([(98, 336), (98, 226), (130, 200), (162, 226), (162, 336)], "#6C49BC", ' opacity=".7"'))
-    for i in range(3):
-        for j in range(4):
-            o.append(rect(34 + i * 18, 246 + j * 22, 8, 10, "#E9D9FF", extra=' opacity=".55"'))
-    o.append('</g>')
-    return "".join(o)
-
-
-def ranking(x, y, angle):
-    o = [f'<g transform="translate({fmt(x)} {fmt(y)}) rotate({angle} 100 100)">']
-    o.append(rect(0, 0, 200, 210, "#141414", rx=14, stroke="#2E2E2E", sw=1.4))
-    o.append(text("semi", "Section Ranking", 16, 34, 15, WHITE))
-    rows = [("A1", 0.92, "#3CCB3C", "9.2", "#A8F25A"), ("B2", 0.72, "#F2D52E", "7.8", "#F6E7B8"),
-            ("C1", 0.5, "#F6C9A0", "6.1", "#F7D3DD")]
-    for i, (lab, frac, col, val, vcol) in enumerate(rows):
-        yy = 72 + i * 38
-        o.append(rect(9, yy - 17, 182, 32, "#1A1A1A", rx=8))
-        o.append(text("semi", lab, 18, yy + 5, 14, WHITE))
-        o.append(rect(50, yy - 4, 96, 9, "#2C2C2C", rx=4.5) + rect(50, yy - 4, 96 * frac, 9, col, rx=4.5))
-        o.append(text("semi", val, 182, yy + 5, 14, vcol, anchor="end"))
-    o.append('</g>')
-    return "".join(o)
-
-
-def terminal(x, y, angle):
-    o = [f'<g transform="translate({fmt(x)} {fmt(y)}) rotate({angle} 110 100)">']
-    o.append(rect(0, 0, 230, 210, "#111111", rx=14, stroke="#3E3E3E", sw=1.4))
-    for i, col in enumerate(("#FF5F57", "#FEBC2E", "#28C840")):
-        o.append(f'<circle cx="{24 + i * 21}" cy="25" r="6.5" fill="{col}"/>')
-    sz = 12.5
-    lines = [[("> dig +trace ", "#F2F2F2"), ("kiit.ac.in", "#D9A9FF")],
-             [(";;  <<>> root", "#E0E0E0")], [(";;  <<>> .in", "#E0E0E0")], [(";;  <<>> kiit.ac.in", "#E0E0E0")]]
-    for i, parts in enumerate(lines):
-        yy = 70 + i * 28 + (8 if i else 0)
-        xx = 16
-        seg = []
-        for s, col in parts:
-            seg.append(text("mono", s, xx, yy, sz, col))
-            xx += tw("mono", s, sz)
-        o.append(f'<g transform="translate(20 {yy}) skewX(-8) translate(-20 {-yy})">' + "".join(seg) + '</g>')
-    o.append('</g>')
-    return "".join(o)
-
-
-def row_cards():
-    h = 232
-    sc = Scene(h)
-    sc.add(poster_bg(W, h))
-    sc.defs.append(RING_GRAD)
-    gap, y, chh = 16, 4, 212
-    cw = (W - 2 * MARGIN - 2 * gap) / 3
-    slices = []
-    for i, p in enumerate(PROJECTS):
-        x = MARGIN + i * (cw + gap)
-        cid = f"card{i}"
-        sc.defs.append(f'<clipPath id="{cid}">{rect(x, y, cw, chh, rx=14)}</clipPath>')
-        g = [f'<g clip-path="url(#{cid})">', rect(x, y, cw, chh, C["dark"])]
-        if p["key"] == "omni":
-            g.append(poly([(x + 0.7 * cw, y), (x + cw, y), (x + cw, y + chh), (x + 0.57 * cw, y + chh)], C["pink"]))
-            g.append(poly([(x + 0.52 * cw, y + chh), (x + 0.62 * cw, y + 0.68 * chh), (x + 0.7 * cw, y + chh)], C["lav_card"]))
-            g.append(phone(sc, x + 0.61 * cw, y + 24, -9))
-        elif p["key"] == "smartschedule":
-            g.append(poly([(x + 0.66 * cw, y), (x + cw, y), (x + cw, y + chh), (x + 0.52 * cw, y + chh)], C["lime"]))
-            g.append(ranking(x + 0.565 * cw, y + 58, -5))
-        else:
-            g.append(poly([(x + 0.76 * cw, y), (x + cw, y), (x + cw, y + 0.42 * chh)], C["lav_card"]))
-            g.append(poly([(x + 0.5 * cw, y + chh), (x + 0.66 * cw, y + 0.6 * chh), (x + 0.64 * cw, y + chh)], C["lav_card"]))
-            g.append(terminal(x + 0.565 * cw, y + 44, -4))
-        g.append('</g>')
-        g.append(project_logo(p["key"], x + 22, y + 22, 46))
-        g.append(text("bold", p["name"], x + 82, y + 52, 24, WHITE, ls=-0.015))
-        for j, s in enumerate(p["long"]):
-            g.append(text("body", s, x + 82, y + 82 + j * 21, 16, SOFT_WHITE))
-        g.append(rect(x + 24, y + chh - 66, 46, 42, "none", rx=8, stroke="#E6E6E6", sw=1.5))
-        g.append(icon("arrow_up_right", x + 35, y + chh - 57, 24, WHITE, 2.2))
-        sc.add("".join(g), x - 1, x + cw + 1)
-        x0 = 0 if i == 0 else x - gap / 2
-        x1 = W if i == 2 else x + cw + gap / 2
-        slices.append((p["file"], x0, x1, LINKS[p["key"]], f'{p["name"]} — {" ".join(p["long"])}'))
-    return sc, slices
-
-
-def row_approach_toolkit():
-    h = 262
-    sc = Scene(h)
-    sc.add(poster_bg(W, h))
-    sc.add(line(MARGIN, 10, W - MARGIN, 10, C["ink"], 1.5))
-    sc.add(section_title(MARGIN, 62, "MY APPROACH"))
-    steps = [("Discover", ["Understand", "the problem"], "lightbulb", C["pink_soft"]),
-             ("Design", ["Explore &", "shape solutions"], "pencil", C["pink_soft"]),
-             ("Build", ["Turn ideas", "into reality"], "code", C["lav"]),
-             ("Iterate", ["Improve with", "real feedback"], "refresh", C["lime_soft"])]
-    tw_, th, ty, x, step = 118, 76, 86, 64, 168
-    for i, (title, desc, ic, col) in enumerate(steps):
-        tx = x + i * step
-        cx = tx + tw_ / 2
-        sc.add(rect(tx, ty, tw_, th, col, rx=14))
-        sc.add(icon(ic, cx - 17, ty + th / 2 - 17, 34, C["ink"], 2.2))
-        sc.add(text("monob", title, cx, ty + th + 36, 18.5, C["ink"], anchor="middle"))
-        for j, s in enumerate(desc):
-            sc.add(text("body", s, cx, ty + th + 62 + j * 21, 16, C["text"], anchor="middle"))
-        if i < len(steps) - 1:
-            sc.add(icon("arrow_right", tx + tw_ + (step - tw_) / 2 - 15, ty + th / 2 - 15, 30, C["ink"], 2))
-    sc.add(line(732, 30, 732, 250, C["ink"], 1.5))
-    sc.add(section_title(760, 62, "TOOLKIT"))
-    gx0, gx1, g, rh = 760, W - MARGIN, 8, 76
-    cw = (gx1 - gx0 - g * (len(TOOLKIT[0]) - 1)) / len(TOOLKIT[0])
-    ls = min(fit("semi", label, 15, cw - 10) for row in TOOLKIT for label, _ in row)
     for r, row in enumerate(TOOLKIT):
-        ry = ty + r * (rh + 10)
-        for i, (label, key) in enumerate(row):
-            tx = gx0 + i * (cw + g)
-            sc.add(rect(tx + 0.75, ry + 0.75, cw - 1.5, rh - 1.5, C["tile"], rx=10, stroke=C["tile_line"], sw=1.5))
-            if key == "sql":
-                sc.add(icon("database", tx + cw / 2 - 15, ry + 11, 30, C["ink"], 2))
+        for i, name in enumerate(row):
+            x, y = 1042 + i * 114.5, 1645 + r * 110
+            sc.add(rect(x, y, 100, 95, C["card"], rx=18, stroke=C["card_line"], sw=2, extra=' filter="url(#soft-shadow)"'))
+            if name in ("c", "cpp"):
+                sc.add(lang_letter(name, x + 50, y + 47.5, 60))
             else:
-                sc.add(brand_icon(key, tx + cw / 2 - 16, ry + 10, 32))
-            sc.add(text("semi", label, tx + cw / 2, ry + 63, ls, C["text"], anchor="middle"))
+                sc.add(brand_icon(name, x + 50 - 31, y + 47.5 - 31, 62))
+
+
+def footer(sc, clip):
+    y0 = STATS_ROW[1]
+    sc.region = (0, W, y0, H)
+    sc.add(raster(os.path.join(ART, "campus.webp"), 652, 2198, 1108, 388, extra=clip), 652, W, y0, H)
+    cells = (rect(32, 2520, 28, 27, C["pink"]) + rect(-2, 2547, 34, 26, C["pink"]) +
+             poly([(60, 2547), (86, 2547), (69, 2573), (60, 2573)], C["pink"]) + rect(32, 2573, 28, 20, C["pink"]))
+    sc.add(f'<g{clip}>{cells}</g>', 0, 100, 2500, H)
+
+    sc.add(hand("Let’s Build", 90, 2321, 282, -10.5, C["ink"], 2.6), 0, 640, y0, 2430)
+    sc.add(hand("Something", 101, 2388, 255, -10, C["ink"], 2.6), 0, 640, y0, 2430)
+    box = rect(-77, -37, 154, 72, C["pink"], rx=10)
+    cool = hand("Cool!", -63, 23, 126, 0, C["ink"], 2.6)
+    sc.add(g(box + cool, 455, 2323, -8), 0, 640, y0, 2430)
+    sc.add(strokes(["M542 2266L531 2285", "M568 2281L545 2291", "M548 2305L570 2309"], C["pink"], 4.8), 0, 640, y0, 2430)
+    sc.add(strokes(["M494 2377C530 2360 576 2366 593 2416", "M571 2407L593 2419L596 2396"], C["ink"], 4.8),
+           480, 610, y0, 2430)
+
+    for key, label, x, w in BUTTONS:
+        y, h = 2436, 67
+        sc.add(rect(x, y, w, h, C["card"], rx=14, stroke="#262422", sw=2.8), x - 2, x + w + 2, y - 2, y + h + 2)
+        lw = tw("semi", label, 26.5)
+        isz = 36
+        cx0 = x + (w - (isz + 14 + lw)) / 2
+        cy = y + h / 2
+        if key == "email":
+            ic = icon("envelope", cx0, cy - isz / 2 + 1, isz, C["ink"], 3.4)
+        elif key == "linkedin":
+            ic = text("display", "in", cx0 + isz / 2, cy + cap("display", 38) / 2, 38, C["ink"], anchor="middle",
+                      ls=-0.02, heavy=1)
+        else:
+            ic = github_mark(cx0, cy - isz / 2, isz, C["ink"])
+        sc.add(ic + text("semi", label, cx0 + isz + 14, cy + cap("semi", 26.5) / 2, 26.5, C["ink"], heavy=0.4),
+               x, x + w, y, y + h)
+
+
+# ------------------------------------------------------------------ assembly
+
+def build_scene():
+    sc = Scene()
+    sc.defs.extend(DEFS)
+    bg = poster_bg(W, H, top=True, bottom=True)
+    sc.defs.append(f'<clipPath id="poster-clip">{bg.replace(" fill=", " data-fill=")}</clipPath>')
+    sc.add(bg, 0, W, 0, H)
+    header(sc)
+    hero(sc)
+    projects(sc)
+    approach_toolkit(sc)
+    footer(sc, ' clip-path="url(#poster-clip)"')
     return sc
 
 
-def row_footer():
-    h = 162
-    sc = Scene(h)
-    sc.add(poster_bg(W, h, bottom=True))
-    x0, y0, x1, y1 = MARGIN, 14, W - MARGIN, 124
-    sc.defs.append(f'<clipPath id="bar">{rect(x0, y0, x1 - x0, y1 - y0, rx=14)}</clipPath>')
-    sc.add(rect(x0, y0, x1 - x0, y1 - y0, C["dark"], rx=14))
-    fs, ls = 30, -0.025
-    lx = 84
-    sc.add(text("display", "Let’s build", lx, 60, fs, WHITE, ls=ls), 0, 400)
-    w_some = tw("display", "something ", fs, ls)
-    w_cool = tw("display", "cool.", fs, ls)
-    chh = cap("display", fs)
-    sc.add(text("display", "something", lx, 98, fs, WHITE, ls=ls), 0, 400)
-    sc.add(rect(lx + w_some - 4, 98 - chh - 7, w_cool + 10, chh + 15, C["pink"], rx=3), 0, 400)
-    sc.add(text("display", "cool.", lx + w_some + 1, 98, fs, C["ink"], ls=ls), 0, 400)
-    dx = lx + max(tw("display", "Let’s build", fs, ls), w_some + w_cool + 6) + 40
-    sc.add(line(dx, 40, dx, 100, "#5E5E5E", 1.5), 0, dx + 2)
-    tx = dx + 34
-    body = ["Open to collaborations, product ideas,", "and internship opportunities."]
-    text_end = tx + max(tw("body", s, 17) for s in body)
-    for i, s in enumerate(body):
-        sc.add(text("body", s, tx, 64 + i * 25, 17, "#DADADA"), tx - 1, text_end + 1)
-
-    cell = 15
-    cxk = x1 - 5 * cell
-    sc.add(f'<g clip-path="url(#bar)">{checker(cxk, y1 - 5 * cell, cell, 5, [C["pink"]])}</g>', cxk - 1, W)
-
-    buttons = [("Email", "mail", "email"), ("LinkedIn", "in", "linkedin"), ("Portfolio", "external", "portfolio"),
-               ("GitHub", "gh", "github")]
-    bs, bh, pad, isz, gap = 18, 52, 22, 22, 16
-
-    def bw(label, ic):
-        iw = tw("display", "in", 22) if ic == "in" else isz
-        return pad + iw + 10 + tw("semi", label, bs) + pad
-
-    total = sum(bw(l, i) for l, i, _ in buttons) + gap * (len(buttons) - 1)
-    bx = cxk - 26 - total
-    assert bx > text_end + 24, "footer buttons overlap the text"
-    by = (y0 + y1) / 2 - bh / 2
-    edges = []
-    for label, ic, key in buttons:
-        w = bw(label, ic)
-        o = rect(bx + 0.75, by + 0.75, w - 1.5, bh - 1.5, "none", rx=10, stroke="#EDEDED", sw=1.5)
-        iy = by + (bh - isz) / 2
-        if ic == "in":
-            o += text("display", "in", bx + pad, by + bh / 2 + cap("display", 22) / 2 + 1, 22, WHITE)
-            iw = tw("display", "in", 22)
-        elif ic == "gh":
-            o += github_mark(bx + pad, iy, isz, WHITE)
-            iw = isz
-        else:
-            o += icon(ic, bx + pad, iy, isz, WHITE, 1.8)
-            iw = isz
-        o += text("semi", label, bx + pad + iw + 10, by + bh / 2 + cap("semi", bs) / 2, bs, WHITE)
-        sc.add(o, bx - 2, bx + w + 2)
-        edges.append((key, label, bx, bx + w))
-        bx += w + gap
-    slices = [("footer-start.svg", 0, edges[0][2] - gap / 2, None,
-               "Let’s build something cool. Open to collaborations, product ideas, and internship opportunities.")]
-    for i, (key, label, a, b) in enumerate(edges):
-        right = edges[i + 1][2] - gap / 2 if i + 1 < len(edges) else b + gap / 2
-        slices.append((f"footer-{key}.svg", a - gap / 2, right, LINKS[key], label))
-    slices.append(("footer-end.svg", edges[-1][3] + gap / 2, W, None, ""))
-    return sc, slices
+def cut(sc, name, x0, y0, x1, y1, alt, href=None):
+    write(name, sc.svg(x0, y0, x1, y1, title=alt))
+    return {"src": f"assets/{name}", "w": x1 - x0, "alt": alt, "href": href}
 
 
-# ------------------------------------------------------------------ output
-
-def img_tag(src, x0, x1, alt, href=None):
-    pct = (x1 - x0) / W * 99.9
-    url = src if src.startswith("http") else f"assets/{src}"
-    tag = f'<img src="{url}" width="{pct:.4f}%" align="top" alt="{esc(alt)}">'
-    return f'<a href="{href}">{tag}</a>' if href else tag
-
-
-def emit_slices(sc, slices):
-    """Write each slice. A slice is (file, x0, x1, href, alt) or (file, x0, x1, y0, y1, href, alt)."""
-    tags = []
-    for s in slices:
-        name, x0, x1, y0, y1, href, alt = s if len(s) == 7 else (s[0], s[1], s[2], 0, sc.h, s[3], s[4])
-        assert y1 - y0 >= MIN_STRIP, f"{name} is too short to stack without gaps"
-        write(name, sc.svg(x0, x1, alt or "decoration", y0, y1))
-        tags.append(img_tag(name, x0, x1, alt, href))
-    return "".join(tags)
-
-
-def emit_full(sc, name, alt, href=None):
-    return emit_slices(sc, [(name, 0, W, href, alt)])
+def readme(rows):
+    lines = []
+    for row in rows:
+        parts = []
+        for t in row:
+            img = f'<img src="{t["src"]}" width="{t["w"] / W * 99.9:.4f}%" align="top" alt="{esc(t["alt"])}">'
+            parts.append(f'<a href="{t["href"]}">{img}</a>' if t["href"] else img)
+        lines.append("".join(parts))
+    body = "<br>\n".join(lines)
+    return ("<!-- Generated by .github/scripts/build_assets.py: edit that file and re-run it to change this page. -->\n\n"
+            f'<div align="center">\n{body}\n</div>\n')
 
 
 def main():
-    hero, hero_top, hero_bottom = row_hero()
+    sc = build_scene()
     rows = []
-    rows.append(emit_slices(*row_nav()))
-    rows.append('<a id="about"></a>' + emit_slices(hero, hero_top))
-    rows.append('<a id="projects"></a>' + emit_slices(hero, hero_bottom))
-    rows.append(emit_slices(*row_cards()))
-    rows.append('<a id="toolkit"></a>' + emit_full(row_approach_toolkit(), "approach-toolkit.svg",
-                "My approach: discover, design, build, iterate. Toolkit: "
-                + ", ".join(label for row in TOOLKIT for label, _ in row) + "."))
-    rows.append('<a id="now"></a>' + img_tag(STATS_URL, 0, W,
-                "GitHub stats, live contribution graph, and what I'm exploring now: ML / AI, Data Science, App Dev.", GH))
-    rows.append('<a id="connect"></a>' + emit_slices(*row_footer()))
+    hero_alt = ("MaiCoderHoon. Hi, I'm Piyush: designing and building digital products that matter. "
+                "Product designer and developer in Bhubaneswar, India; 3rd year at KIIT University. "
+                "Product design, full-stack development, AI/ML.")
+    rows.append([cut(sc, "hero.svg", 0, 0, W, 1010, hero_alt)])
 
-    readme = ("<!-- The poster below is generated. Edit .github/scripts/build_assets.py and run it to change it. -->\n\n"
-              '<div align="center">\n' + "<br>\n".join(rows) + "\n</div>\n")
+    # Rows of tiles stay at least ~190 units tall: a shorter strip is padded out by the
+    # page's line height on phones, which shows up as gaps. So the four "more projects"
+    # share one link (the repositories tab) instead of one thin strip each.
+    more = "; ".join(f'{p["name"]}: {p["desc"]}' for p in MORE)
+    rows.append([
+        cut(sc, "projects-omni.svg", 0, 1010, 490, 1530,
+            "Currently building: Omni KIIT, a campus super-app for KIIT students.", LINKS["omni"]),
+        cut(sc, "projects-smartschedule.svg", 490, 1010, 967, 1530,
+            "SmartSchedule: AI-driven academic section optimizer.", LINKS["smartschedule"]),
+        cut(sc, "projects-more.svg", 967, 1010, W, 1530, f"More projects. {more}", LINKS["repos"]),
+    ])
+
+    tools = ", ".join(TOOL_NAMES[n] for row in TOOLKIT for n in row)
+    rows.append([cut(sc, "approach.svg", 0, 1530, W, STATS_ROW[0],
+                     f"My approach: discover, design, build, iterate. Toolkit: {tools}.")])
+    rows.append([{"src": STATS_URL, "w": W, "href": LINKS["profile"],
+                  "alt": "Live GitHub stats (repos, commits, pull requests, stars) and contribution graph"}])
+
+    y0 = STATS_ROW[1]
+    rows.append([cut(sc, "footer-top.svg", 0, y0, W, 2400, "Let's build something cool!")])
+    rows.append([cut(sc, "footer-l.svg", 0, 2400, 85, H, "")] +
+                [cut(sc, f"footer-{k}.svg", x0, 2400, x1, H, label, LINKS[k])
+                 for (k, label, _, _), (x0, x1) in zip(BUTTONS, ((85, 285), (285, 510), (510, 725)))] +
+                [cut(sc, "footer-campus.svg", 725, 2400, W, H, "KIIT campus")])
+
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8", newline="\n") as f:
-        f.write(readme)
-    print("wrote README.md and", len(os.listdir(ASSETS)), "files in assets/")
+        f.write(readme(rows))
+
+    produced = {os.path.basename(t["src"]) for row in rows for t in row if t["src"].startswith("assets/")}
+    for old in os.listdir(ASSETS):  # drop assets from earlier designs
+        if old.endswith(".svg") and old not in produced and old != "stats.svg":
+            os.remove(os.path.join(ASSETS, old))
+    print("wrote README.md and", len(produced), "assets")
 
 
 if __name__ == "__main__":

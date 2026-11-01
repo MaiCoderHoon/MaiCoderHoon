@@ -1,10 +1,12 @@
 name: Sync Stats Card
 
-# Rebuilds the stats + contribution graph card and publishes it to the `output`
-# branch (not `main`), so bot updates never show up as contributions or clutter history.
+# Rebuilds the poster's "GitHub Stats" row (stat tiles + contribution graph) from live
+# data and publishes it to the `output` branch (not `main`), so bot updates never show
+# up as contributions or clutter history. GitHub's shortest schedule is every 5 minutes;
+# the README image is cached for about 5 more, so the profile is at most ~10 minutes behind.
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
