@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="420" viewBox="0 0 720 420" role="img" aria-labelledby="t d">
+<title id="t">WAKEWISE — A more intentional start to the day.</title><desc id="d">A project exploring a more intentional approach to waking up and starting the day.</desc>
+<defs><pattern id="grid" width="22" height="22" patternUnits="userSpaceOnUse"><path d="M22 0H0V22" fill="none" stroke="#d8d1c8" opacity=".55"/></pattern></defs>
+<rect width="720" height="420" rx="8" fill="#f4f0e8"/><rect width="720" height="420" fill="url(#grid)"/>
+<rect width="720" height="14" fill="#c9ff3d"/>
+<text x="34" y="52" fill="#171717" font-family="Arial" font-size="15" font-weight="700" letter-spacing="2">SELECTED WORK / 04</text>
+<text x="34" y="142" fill="#171717" font-family="Arial" font-size="54" font-weight="900" letter-spacing="-2">WAKEWISE</text>
+<text x="36" y="181" fill="#45413d" font-family="Arial" font-size="20">A more intentional start to the day.</text>
+<path d="M34 208H686" stroke="#171717" stroke-width="2"/><rect x="485" y="226" width="142" height="120" rx="8" fill="#171717"/><circle cx="556" cy="286" r="34" fill="none" stroke="#f4f0e8" stroke-width="4"/><path d="M556 262V287L576 300" fill="none" stroke="#D461CB" stroke-width="5"/><path d="M515 242L505 232M597 242L607 232" stroke="#c9ff3d" stroke-width="4"/>
+<text x="34" y="375" fill="#171717" font-family="Arial" font-size="15" font-weight="700">APP CONCEPT  /  UX  /  DEVELOPMENT</text>
+<text x="686" y="375" text-anchor="end" fill="#171717" font-family="Arial" font-size="16" font-weight="700">EXPLORE ↗</text></svg>

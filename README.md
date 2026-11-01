@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="assets/header.svg" width="100%" alt="Piyush Bisoi — product-minded designer and developer"/>
+<img src="assets/header.svg" width="100%" alt="Piyush — designing and building digital products"/>
 
 <a href="https://www.linkedin.com/in/piyush-bisoi"><img src="https://img.shields.io/badge/LINKEDIN-171717?style=for-the-badge&logo=linkedin&logoColor=white" alt="LinkedIn"/></a>
 <a href="mailto:buildgreat4wld@gmail.com"><img src="https://img.shields.io/badge/EMAIL-D461CB?style=for-the-badge&logo=gmail&logoColor=171717" alt="Email"/></a>
@@ -22,71 +22,19 @@ I enjoy taking ideas from a rough sketch to a working product: understanding the
 
 ## CURRENTLY BUILDING
 
-<table>
-<tr>
-<td width="33%" valign="top">
-
-### OMNI KIIT
-A campus companion concept helping students make sense of their day — from schedules and opportunities to campus information.
-
-**Focus:** Flutter · Product UX · Mobile
-
-</td>
-<td width="33%" valign="top">
-
-### SmartSchedule
-An academic section optimizer exploring how schedule data and faculty preferences can help students make better section choices.
-
-**Focus:** React · FastAPI · AI-assisted parsing
-
-</td>
-<td width="33%" valign="top">
-
-### RootRunner
-A DNS resolution project exploring how domain lookups work under the hood.
-
-**Focus:** Python · Networking · DNS
-
-</td>
-</tr>
-</table>
+| OMNI KIIT | SmartSchedule |
+|:--|:--|
+| A student-first campus companion concept bringing schedules, opportunities and campus information together. | An academic section optimizer exploring schedule data and faculty preferences to help students make better choices. |
+| `Flutter` `Product UX` `Mobile` | `React` `FastAPI` `AI-assisted parsing` |
 
 ## SELECTED WORK
 
-<table>
-<tr>
-<td width="50%" valign="top">
-
-<a href="https://github.com/MaiCoderHoon/RootRunner"><b>ROOTRUNNER ↗</b></a>
-
-A hands-on exploration of DNS resolution and the systems behind turning domain names into destinations.
-
-</td>
-<td width="50%" valign="top">
-
-<a href="https://github.com/MaiCoderHoon/scamBust"><b>SCAMBUST ↗</b></a>
-
-A project focused on helping people recognize suspicious messages and scam patterns.
-
-</td>
-</tr>
-<tr>
-<td width="50%" valign="top">
-
-<a href="https://github.com/MaiCoderHoon/flipkart-price-prediction"><b>PRICE PREDICTION ↗</b></a>
-
-An ML workflow using product listing data, preprocessing, feature engineering, and model evaluation.
-
-</td>
-<td width="50%" valign="top">
-
-<a href="https://github.com/MaiCoderHoon/wakewise"><b>WAKEWISE ↗</b></a>
-
-A project exploring a more intentional approach to waking up and starting the day.
-
-</td>
-</tr>
-</table>
+<div align="center">
+  <a href="https://github.com/MaiCoderHoon/RootRunner"><img src="assets/project-rootrunner.svg" width="48%" alt="RootRunner project card"/></a>
+  <a href="https://github.com/MaiCoderHoon/scamBust"><img src="assets/project-scambust.svg" width="48%" alt="ScamBust project card"/></a>
+  <a href="https://github.com/MaiCoderHoon/flipkart-price-prediction"><img src="assets/project-price-prediction.svg" width="48%" alt="Price prediction project card"/></a>
+  <a href="https://github.com/MaiCoderHoon/wakewise"><img src="assets/project-wakewise.svg" width="48%" alt="Wakewise project card"/></a>
+</div>
 
 ---
 
@@ -116,15 +64,11 @@ A project exploring a more intentional approach to waking up and starting the da
 <img height="165" src="https://github-readme-stats.vercel.app/api/top-langs/?username=MaiCoderHoon&layout=compact&hide_border=true&bg_color=F4F0E8&title_color=171717&text_color=444444" alt="Most used languages"/>
 </div>
 
-<div align="center">
-<img src="https://raw.githubusercontent.com/MaiCoderHoon/MaiCoderHoon/output/github-snake.svg" width="100%" alt="Contribution activity"/>
-</div>
-
 ---
 
 ## NOW EXPLORING
 
-APP DEVELOPMENT　/　AI & ML　/　DATA SCIENCE　/　PRODUCT DESIGN
+`APP DEVELOPMENT`　`AI / ML`　`DATA SCIENCE`　`PRODUCT DESIGN`
 
 ---
 
