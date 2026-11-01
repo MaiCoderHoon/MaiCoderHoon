@@ -22,7 +22,7 @@ LINKS = {
     "omni": f"{GH}?tab=repositories",        # Omni KIIT has no public repo yet; swap in its URL when it does
     "smartschedule": f"{GH}/SmartSelector",
     "rootrunner": f"{GH}/RootRunner",
-    "email": "mailto:buildgreat4wld@gmail.com",
+    "email": "mailto:piyush993bisoi@outlook.com",
     "linkedin": "https://www.linkedin.com/in/piyush-bisoi",
     "portfolio": f"{GH}?tab=repositories",   # swap in a portfolio site when there is one
     "github": GH,
