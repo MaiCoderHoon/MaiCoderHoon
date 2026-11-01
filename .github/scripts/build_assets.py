@@ -11,7 +11,7 @@ every few minutes from live data (see .github/workflows/stats.yml).
 import math
 import os
 
-from svgkit import (ASSETS, C, H, HERE, W, Scene, brand_icon, cap, esc, fmt, github_mark, icon, line, logo, moon,
+from svgkit import (ASSETS, C, HERE, W, Scene, brand_icon, cap, esc, fmt, icon, line, logo, moon,
                     poly, poster_bg, raster, rect, section_title, strokes, text, tw, write)
 
 ROOT = os.path.normpath(os.path.join(HERE, "..", ".."))
@@ -57,7 +57,6 @@ TOOLKIT = [["python", "postgresql", "kotlin", "java", "cpp", "c"],
 TOOL_NAMES = {"python": "Python", "postgresql": "PostgreSQL", "kotlin": "Kotlin", "java": "Java", "cpp": "C++",
               "c": "C", "flutter": "Flutter", "jetpackcompose": "Jetpack Compose", "android": "Android",
               "fastapi": "FastAPI", "pandas": "pandas", "scikitlearn": "scikit-learn", "figma": "Figma"}
-BUTTONS = [("email", "Email", 87, 190), ("linkedin", "LinkedIn", 293, 209), ("github", "GitHub", 518, 199)]
 
 
 
@@ -346,39 +345,51 @@ def approach_toolkit(sc):
                 sc.add(brand_icon(name, x + tile / 2 - isz / 2, y + th / 2 - isz / 2, isz))
 
 
-def footer(sc, clip):
-    y0 = STATS_ROW[1]
-    sc.region = (0, W, y0, H)
-    sc.add(raster(os.path.join(ART, "campus.webp"), 652, 2198, 1108, 388, extra=clip), 652, W, y0, H)
-    cells = (rect(32, 2520, 28, 27, C["pink"]) + rect(-2, 2547, 34, 26, C["pink"]) +
-             poly([(60, 2547), (86, 2547), (69, 2573), (60, 2573)], C["pink"]) + rect(32, 2573, 28, 20, C["pink"]))
-    sc.add(f'<g{clip}>{cells}</g>', 0, 100, 2500, H)
+# The footer is a supplied banner illustration (art/footer.png). It is recoloured to the
+# poster cream, its bottom corners rounded to match, and cut into raster slices: a full-width
+# top band and a bottom band split so the Email / LinkedIn / GitHub buttons stay clickable.
+FOOTER_SRC = os.path.join(ART, "footer.png")
+FOOTER_YCUT = 455                 # split above the buttons (native px)
+FOOTER_RADIUS = 47                # poster RADIUS at the banner's native scale (2172/1764)
+FOOTER_COLS = [("email", 0, 257, "email"), ("linkedin", 257, 480, "linkedin"),
+               ("github", 480, 700, "github"), ("rest", 700, None, "profile")]
+FOOTER_ALT = {"email": "Email", "linkedin": "LinkedIn", "github": "GitHub", "rest": ""}
 
-    sc.add(hand("Let’s Build", 90, 2321, 282, -10.5, C["ink"], 2.6), 0, 640, y0, 2430)
-    sc.add(hand("Something", 101, 2388, 255, -10, C["ink"], 2.6), 0, 640, y0, 2430)
-    box = rect(-77, -37, 154, 72, C["pink"], rx=10)
-    cool = hand("Cool!", -63, 23, 126, 0, C["ink"], 2.6)
-    sc.add(g(box + cool, 455, 2323, -8), 0, 640, y0, 2430)
-    sc.add(strokes(["M542 2266L531 2285", "M568 2281L545 2291", "M548 2305L570 2309"], C["pink"], 4.8), 0, 640, y0, 2430)
-    sc.add(strokes(["M494 2377C530 2360 576 2366 593 2416", "M571 2407L593 2419L596 2396"], C["ink"], 4.8),
-           480, 610, y0, 2430)
 
-    for key, label, x, w in BUTTONS:
-        y, h = 2436, 67
-        sc.add(rect(x, y, w, h, C["card"], rx=14, stroke="#262422", sw=2.8), x - 2, x + w + 2, y - 2, y + h + 2)
-        lw = tw("semi", label, 26.5)
-        isz = 36
-        cx0 = x + (w - (isz + 14 + lw)) / 2
-        cy = y + h / 2
-        if key == "email":
-            ic = icon("envelope", cx0, cy - isz / 2 + 1, isz, C["ink"], 3.4)
-        elif key == "linkedin":
-            ic = text("display", "in", cx0 + isz / 2, cy + cap("display", 38) / 2, 38, C["ink"], anchor="middle",
-                      ls=-0.02, heavy=1)
-        else:
-            ic = github_mark(cx0, cy - isz / 2, isz, C["ink"])
-        sc.add(ic + text("semi", label, cx0 + isz + 14, cy + cap("semi", 26.5) / 2, 26.5, C["ink"], heavy=0.4),
-               x, x + w, y, y + h)
+def build_footer():
+    """Write the footer banner slices to assets/ and return README row descriptors."""
+    from PIL import Image, ImageDraw
+
+    src_cream, cream = (254, 245, 241), tuple(int(C["bg"][i:i + 2], 16) for i in (1, 3, 5))
+    im = Image.open(FOOTER_SRC).convert("RGB")
+    w, h = im.size
+    flood, sentinel = im.copy(), (0, 255, 1)
+    border = ([(x, 0) for x in range(w)] + [(x, h - 1) for x in range(w)] +
+              [(0, y) for y in range(h)] + [(w - 1, y) for y in range(h)])
+    for p in border:
+        if flood.getpixel(p) != sentinel and sum(abs(a - b) for a, b in zip(flood.getpixel(p), src_cream)) < 14:
+            ImageDraw.floodfill(flood, p, sentinel, thresh=12)
+    out = im.convert("RGBA")
+    fp, op = flood.load(), out.load()
+    for y in range(h):
+        for x in range(w):
+            if fp[x, y] == sentinel:
+                op[x, y] = (*cream, 255)
+    r = FOOTER_RADIUS
+    for cx in (r, w - r):
+        for y in range(h - r, h):
+            for x in range(cx - r, cx + r):
+                if 0 <= x < w and (x - cx) ** 2 + (y - (h - r)) ** 2 > r * r:
+                    op[x, y] = (0, 0, 0, 0)
+
+    def save(name, box, alt, href):
+        out.crop(box).save(os.path.join(ASSETS, f"footer-{name}.webp"), "WEBP", quality=92, method=6)
+        return {"src": f"assets/footer-{name}.webp", "w": (box[2] - box[0]) * W / w, "alt": alt, "href": href}
+
+    top = [save("row-a", (0, 0, w, FOOTER_YCUT), "Let's build something cool.", LINKS["profile"])]
+    bottom = [save(n, (x0, FOOTER_YCUT, w if x1 is None else x1, h), FOOTER_ALT[n], LINKS[key])
+              for n, x0, x1, key in FOOTER_COLS]
+    return [top, bottom]
 
 
 # ------------------------------------------------------------------ assembly
@@ -386,14 +397,12 @@ def footer(sc, clip):
 def build_scene():
     sc = Scene()
     sc.defs.extend(DEFS)
-    bg = poster_bg(W, H, top=True, bottom=True)
-    sc.defs.append(f'<clipPath id="poster-clip">{bg.replace(" fill=", " data-fill=")}</clipPath>')
-    sc.add(bg, 0, W, 0, H)
+    bg = poster_bg(W, STATS_ROW[0], top=True)
+    sc.add(bg, 0, W, 0, STATS_ROW[0])
     header(sc)
     hero(sc)
     projects(sc)
     approach_toolkit(sc)
-    footer(sc, ' clip-path="url(#poster-clip)"')
     return sc
 
 
@@ -441,19 +450,16 @@ def main():
     rows.append([{"src": STATS_URL, "w": W, "href": LINKS["profile"],
                   "alt": "Live GitHub stats (repos, commits, pull requests, stars) and contribution graph"}])
 
-    y0 = STATS_ROW[1]
-    rows.append([cut(sc, "footer-top.svg", 0, y0, W, 2400, "Let's build something cool!")])
-    rows.append([cut(sc, "footer-l.svg", 0, 2400, 85, H, "")] +
-                [cut(sc, f"footer-{k}.svg", x0, 2400, x1, H, label, LINKS[k])
-                 for (k, label, _, _), (x0, x1) in zip(BUTTONS, ((85, 285), (285, 510), (510, 725)))] +
-                [cut(sc, "footer-campus.svg", 725, 2400, W, H, "KIIT campus")])
+    rows.extend(build_footer())
 
     with open(os.path.join(ROOT, "README.md"), "w", encoding="utf-8", newline="\n") as f:
         f.write(readme(rows))
 
     produced = {os.path.basename(t["src"]) for row in rows for t in row if t["src"].startswith("assets/")}
     for old in os.listdir(ASSETS):  # drop assets from earlier designs
-        if old.endswith(".svg") and old not in produced and old != "stats.svg":
+        if old in ("stats.svg",) or os.path.isdir(os.path.join(ASSETS, old)):
+            continue
+        if old.endswith((".svg", ".webp")) and old not in produced:
             os.remove(os.path.join(ASSETS, old))
     print("wrote README.md and", len(produced), "assets")
 
