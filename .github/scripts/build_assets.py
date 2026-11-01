@@ -97,14 +97,14 @@ def project_logo(key, x, y, s):
     return rings_logo(x, y, s)
 
 
-def gemini_logo(x, y, s):
-    k = s / 24
-    d = "M12 0C12 6.6 17.4 12 24 12C17.4 12 12 17.4 12 24C12 17.4 6.6 12 0 12C6.6 12 12 6.6 12 0Z"
-    return (f'<path transform="translate({fmt(x)} {fmt(y)}) scale({k:.4f})" d="{d}" fill="url(#gemini)"/>')
-
-
-GEMINI_GRAD = ('<linearGradient id="gemini" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#4F8DF7"/>'
-               '<stop offset=".55" stop-color="#9B72EB"/><stop offset="1" stop-color="#C46CE0"/></linearGradient>')
+#  Toolkit tiles, taken from the resume: languages on top, frameworks / ML / tools below.
+#  (label, logo file in brand-icons/ or "sql" for the generic database icon)
+TOOLKIT = [
+    [("Python", "python"), ("SQL", "sql"), ("Kotlin", "kotlin"), ("Java", "java"), ("C++", "cplusplus"),
+     ("Dart", "dart"), ("C", "c")],
+    [("Flutter", "flutter"), ("Compose", "jetpackcompose"), ("FastAPI", "fastapi"), ("Pandas", "pandas"),
+     ("scikit-learn", "scikitlearn"), ("Figma", "figma"), ("Git", "git")],
+]
 
 
 def checker(x, y, cell, n, colors, flip=False):
@@ -481,7 +481,6 @@ def row_approach_toolkit():
     h = 262
     sc = Scene(h)
     sc.add(poster_bg(W, h))
-    sc.defs.append(GEMINI_GRAD)
     sc.add(line(MARGIN, 10, W - MARGIN, 10, C["ink"], 1.5))
     sc.add(section_title(MARGIN, 62, "MY APPROACH"))
     steps = [("Discover", ["Understand", "the problem"], "lightbulb", C["pink_soft"]),
@@ -501,17 +500,19 @@ def row_approach_toolkit():
             sc.add(icon("arrow_right", tx + tw_ + (step - tw_) / 2 - 15, ty + th / 2 - 15, 30, C["ink"], 2))
     sc.add(line(732, 30, 732, 250, C["ink"], 1.5))
     sc.add(section_title(760, 62, "TOOLKIT"))
-    tools = [("Figma", "figma"), ("Flutter", "flutter"), ("React", "react"), ("Python", "python"),
-             ("TS", "typescript"), ("Node.js", "nodejs"), ("Postgres", "postgresql"), ("Gemini", None)]
-    gx0, gx1, g = 760, W - MARGIN, 10
-    cw = (gx1 - gx0 - g * (len(tools) - 1)) / len(tools)
-    ls = min(fit("semi", t[0], 16, cw - 10) for t in tools)
-    for i, (label, key) in enumerate(tools):
-        tx = gx0 + i * (cw + g)
-        sc.add(rect(tx + 0.75, ty + 0.75, cw - 1.5, 122, C["tile"], rx=10, stroke=C["tile_line"], sw=1.5))
-        lx = tx + cw / 2 - 22
-        sc.add(brand_icon(key, lx, ty + 22, 44) if key else gemini_logo(lx + 1, ty + 23, 42))
-        sc.add(text("semi", label, tx + cw / 2, ty + 100, ls, C["text"], anchor="middle"))
+    gx0, gx1, g, rh = 760, W - MARGIN, 8, 76
+    cw = (gx1 - gx0 - g * (len(TOOLKIT[0]) - 1)) / len(TOOLKIT[0])
+    ls = min(fit("semi", label, 15, cw - 10) for row in TOOLKIT for label, _ in row)
+    for r, row in enumerate(TOOLKIT):
+        ry = ty + r * (rh + 10)
+        for i, (label, key) in enumerate(row):
+            tx = gx0 + i * (cw + g)
+            sc.add(rect(tx + 0.75, ry + 0.75, cw - 1.5, rh - 1.5, C["tile"], rx=10, stroke=C["tile_line"], sw=1.5))
+            if key == "sql":
+                sc.add(icon("database", tx + cw / 2 - 15, ry + 11, 30, C["ink"], 2))
+            else:
+                sc.add(brand_icon(key, tx + cw / 2 - 16, ry + 10, 32))
+            sc.add(text("semi", label, tx + cw / 2, ry + 63, ls, C["text"], anchor="middle"))
     return sc
 
 
@@ -614,8 +615,8 @@ def main():
     rows.append('<a id="projects"></a>' + emit_slices(hero, hero_bottom))
     rows.append(emit_slices(*row_cards()))
     rows.append('<a id="toolkit"></a>' + emit_full(row_approach_toolkit(), "approach-toolkit.svg",
-                "My approach: discover, design, build, iterate. Toolkit: Figma, Flutter, React, Python, TypeScript, "
-                "Node.js, Postgres, Gemini."))
+                "My approach: discover, design, build, iterate. Toolkit: "
+                + ", ".join(label for row in TOOLKIT for label, _ in row) + "."))
     rows.append('<a id="now"></a>' + img_tag(STATS_URL, 0, W,
                 "GitHub stats, live contribution graph, and what I'm exploring now: ML / AI, Data Science, App Dev.", GH))
     rows.append('<a id="connect"></a>' + emit_slices(*row_footer()))
