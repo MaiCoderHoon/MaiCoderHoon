@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="620" height="330" viewBox="0 0 620 330" role="img" aria-labelledby="title desc">
+<title id="title">Currently building</title><desc id="desc">Omni KIT, a campus companion for KIT students, and SmartSchedule, an academic section optimizer.</desc>
+<defs><clipPath id="clip"><path d="M0 0H602L620 18V330H0Z"/></clipPath></defs>
+<g clip-path="url(#clip)"><rect width="620" height="330" fill="#111"/><path d="M0 0H602L620 18H0Z" fill="#222"/>
+<rect x="34" y="31" width="14" height="14" fill="#baff00"/><text x="62" y="44" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="19" font-weight="900">CURRENTLY BUILDING</text>
+<g transform="translate(35 79)"><path d="M0 8h18v18H0zM18 26h18v18H18zM36 8h18v18H36zM18 -10h18V8H18z" fill="#f7f3ec"/><path d="M36 26h18v18H36z" fill="#aaa"/></g>
+<text x="112" y="96" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="900">Omni KIT</text><text x="112" y="121" fill="#e5e5e5" font-family="Arial,Helvetica,sans-serif" font-size="14">Campus companion for KIT students.</text><path d="M112 146H585" stroke="#777"/>
+<g transform="translate(35 178)"><rect width="54" height="42" rx="8" fill="#baff00"/><path d="M11 29l14-15 9 8 10-12" fill="none" stroke="#111" stroke-width="5"/><path d="M35 10h10v10" fill="none" stroke="#111" stroke-width="4"/></g>
+<text x="112" y="198" fill="#fff" font-family="Arial,Helvetica,sans-serif" font-size="21" font-weight="900">SmartSchedule</text><text x="112" y="223" fill="#e5e5e5" font-family="Arial,Helvetica,sans-serif" font-size="14">AI-assisted academic section optimizer.</text><path d="M112 248H585" stroke="#777"/>
+<text x="35" y="293" fill="#f05ac8" font-family="'Courier New',monospace" font-size="12" font-weight="700" letter-spacing="1.2">IDEAS IN PROGRESS  /  DESIGN · CODE · ITERATE</text>
+<path d="M558 83l24 24m-24 0h24V83M558 185l24 24m-24 0h24v-24" fill="none" stroke="#fff" stroke-width="2"/>
+</g></svg>
