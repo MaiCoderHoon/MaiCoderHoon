@@ -37,6 +37,9 @@ PROJECTS = [  # "short" = hero panel copy, "long" = selected-work card copy (one
      "long": ["Iterative DNS", "resolution engine", "in Python."], "file": "card-rootrunner.svg"},
 ]
 
+# Rebuilt every 10 minutes by .github/workflows/stats.yml and published to the `output` branch.
+STATS_URL = f"https://raw.githubusercontent.com/{USER}/{USER}/output/stats.svg"
+
 HERO_ALT = ("Piyush — designing and building digital products that matter. Product-minded designer and developer. "
             "Currently building Omni KIIT, SmartSchedule and RootRunner.")
 
@@ -583,7 +586,8 @@ def row_footer():
 
 def img_tag(src, x0, x1, alt, href=None):
     pct = (x1 - x0) / W * 99.9
-    tag = f'<img src="assets/{src}" width="{pct:.4f}%" align="top" alt="{esc(alt)}">'
+    url = src if src.startswith("http") else f"assets/{src}"
+    tag = f'<img src="{url}" width="{pct:.4f}%" align="top" alt="{esc(alt)}">'
     return f'<a href="{href}">{tag}</a>' if href else tag
 
 
@@ -612,8 +616,8 @@ def main():
     rows.append('<a id="toolkit"></a>' + emit_full(row_approach_toolkit(), "approach-toolkit.svg",
                 "My approach: discover, design, build, iterate. Toolkit: Figma, Flutter, React, Python, TypeScript, "
                 "Node.js, Postgres, Gemini."))
-    rows.append('<a id="now"></a>' + img_tag("stats.svg", 0, W,
-                "GitHub stats, contribution graph, and what I'm exploring now: ML / AI, Data Science, App Dev."))
+    rows.append('<a id="now"></a>' + img_tag(STATS_URL, 0, W,
+                "GitHub stats, live contribution graph, and what I'm exploring now: ML / AI, Data Science, App Dev.", GH))
     rows.append('<a id="connect"></a>' + emit_slices(*row_footer()))
 
     readme = ("<!-- The poster below is generated. Edit .github/scripts/build_assets.py and run it to change it. -->\n\n"

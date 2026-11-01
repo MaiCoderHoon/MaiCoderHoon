@@ -1,8 +1,10 @@
-name: Update Stats Card
+name: Sync Stats Card
 
+# Rebuilds the stats + contribution graph card and publishes it to the `output`
+# branch (not `main`), so bot updates never show up as contributions or clutter history.
 on:
   schedule:
-    - cron: "17 */12 * * *"
+    - cron: "*/10 * * * *"
   workflow_dispatch:
   push:
     branches: [main]
@@ -13,6 +15,10 @@ on:
 permissions:
   contents: write
 
+concurrency:
+  group: stats-card
+  cancel-in-progress: true
+
 jobs:
   stats:
     runs-on: ubuntu-latest
@@ -22,16 +28,15 @@ jobs:
       - name: Generate stats card
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/gen_stats.py
+        run: python3 .github/scripts/gen_stats.py --out dist/stats.svg
 
-      - name: Commit if changed
-        run: |
-          git config user.name "Piyush Padmakar Bisoi"
-          git config user.email "buildgreat4wld@gmail.com"
-          git add assets/stats.svg
-          if git diff --cached --quiet; then
-            echo "No changes"
-          else
-            git commit -m "chore: refresh stats card"
-            git push
-          fi
+      - name: Publish to output branch
+        if: hashFiles('dist/stats.svg') != ''
+        uses: crazy-max/ghaction-github-pages@v3.1.0
+        with:
+          target_branch: output
+          build_dir: dist
+          keep_history: false
+          commit_message: "chore: sync contribution graph"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

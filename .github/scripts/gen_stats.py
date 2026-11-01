@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
-"""Render assets/stats.svg: GitHub stats, contribution graph and "now exploring".
+"""Render the stats card: GitHub stats, contribution graph and "now exploring".
 
-Run by .github/workflows/stats.yml (standard library only). If GitHub can't be
-reached the existing card is left untouched. `--placeholder` renders empty data.
+Run by .github/workflows/stats.yml every 10 minutes (standard library only); the
+workflow publishes the result to the `output` branch, which the README embeds.
+If GitHub can't be reached nothing is written, so the last good card stays live.
+
+    python gen_stats.py                  # writes assets/stats.svg
+    python gen_stats.py --out dist/x.svg
+    python gen_stats.py --placeholder    # empty data, for layout checks
 """
+import datetime
 import json
 import os
 import re
@@ -17,6 +23,16 @@ OWNER = os.environ.get("GITHUB_REPOSITORY_OWNER") or "MaiCoderHoon"
 TOKEN = os.environ.get("GITHUB_TOKEN")
 LEVELS = ["#0B3D14", "#22802A", "#4BAE2C", "#97DE1A", C["lime"]]
 EXPLORING = [("ML / AI", "sparkle"), ("Data Science", "database"), ("App Dev", "smartphone")]
+
+# Only the "today" outline and the live dot pulse, and never below 20% opacity, so the card
+# is fully drawn in every frame (previews and thumbnails included).
+STYLE = (
+    "<style>"
+    "@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}"
+    ".today,.live{animation:pulse 1.6s ease-in-out infinite}"
+    "@media (prefers-reduced-motion:reduce){.today,.live{animation:none}}"
+    "</style>"
+)
 
 
 def request(url, data=None, accept="application/vnd.github+json"):
@@ -79,9 +95,10 @@ def short(n):
     return str(n)
 
 
-def render(data):
+def render(data, synced):
     h = 200
     sc = Scene(h)
+    sc.defs.append(STYLE)
     sc.add(poster_bg(W, h))
     sc.add(line(MARGIN, 10, W - MARGIN, 10, C["ink"], 1.5))
 
@@ -104,11 +121,20 @@ def render(data):
     cell = (gx1 - gx0) / len(weeks)
     sc.add(rect(gx0, gy, gx1 - gx0, cell * 7, "#062B0D"))
     for i, week in enumerate(weeks):
-        for day, level in week:
-            sc.add(rect(gx0 + i * cell + 0.6, gy + day * cell + 0.6, cell - 1.2, cell - 1.2, LEVELS[level]))
+        sc.add("".join(rect(gx0 + i * cell + 0.6, gy + day * cell + 0.6, cell - 1.2, cell - 1.2, LEVELS[level])
+                       for day, level in week))
+    if data["weeks"] and data["weeks"][-1]:  # blinking outline on the most recent day
+        day, _ = data["weeks"][-1][-1]
+        sc.add(rect(gx0 + (len(weeks) - 1) * cell, gy + day * cell, cell, cell, "none", stroke=C["pink"], sw=1.6,
+                    extra=' class="today"'))
     caption = (f"{data['total']:,} contributions in the last year" if isinstance(data.get("total"), int)
                else "Contributions in the last year")
-    sc.add(text("body", caption, gx0, gy + cell * 7 + 30, 15, C["muted"]))
+    cy = gy + cell * 7 + 30
+    sc.add(text("body", caption, gx0, cy, 15, C["muted"]))
+    stamp = f"Synced {synced}"
+    sc.add(text("mono", stamp, gx1, cy, 12.5, C["muted"], anchor="end"))
+    dot_x = gx1 - tw("mono", stamp, 12.5) - 13
+    sc.add(f'<circle class="live" cx="{dot_x:.1f}" cy="{cy - 4.5:.1f}" r="4" fill="{C["pink"]}"/>')
     sc.add(line(1026, 34, 1026, 186, C["ink"], 1.5))
 
     # now exploring
@@ -132,15 +158,25 @@ def render(data):
 
 
 def main():
+    out = sys.argv[sys.argv.index("--out") + 1] if "--out" in sys.argv else None
     if "--placeholder" in sys.argv:
         data = {"repos": "–", "commits": "–", "prs": "–", "stars": "–", "total": None, "weeks": []}
+        synced = "pending"
     else:
         try:
             data = collect()
         except Exception as exc:
             print("stats refresh skipped:", exc)
             return 0
-    print("wrote", write("stats.svg", render(data)))
+        synced = datetime.datetime.now(datetime.timezone.utc).strftime("%H:%M UTC")
+    svg = render(data, synced)
+    if out:
+        os.makedirs(os.path.dirname(os.path.abspath(out)), exist_ok=True)
+        with open(out, "w", encoding="utf-8", newline="\n") as f:
+            f.write(svg)
+        print("wrote", out)
+    else:
+        print("wrote", write("stats.svg", svg))
     return 0
 
 
