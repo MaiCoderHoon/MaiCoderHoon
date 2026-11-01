@@ -1,9 +1,7 @@
-"""Small SVG toolkit shared by build_assets.py, illustrations.py and gen_stats.py (standard library only).
+"""Small SVG toolkit shared by build_assets.py and gen_stats.py (standard library only).
 
-Text inside the art is drawn as vector outlines from glyphs.json, so illustrations
-render the same on every device without relying on fonts installed on the viewer's
-machine. All README *copy* lives in README.md as real text; SVG text is limited to
-decoration (handwritten notes in illustrations) and the live stats numbers.
+Text is drawn as vector outlines from glyphs.json, so the profile art renders the
+same on every device without relying on fonts installed on the viewer's machine.
 """
 import html
 import json
@@ -14,22 +12,26 @@ import time
 HERE = os.path.dirname(os.path.abspath(__file__))
 ASSETS = os.path.normpath(os.path.join(HERE, "..", "..", "assets"))
 
-# C1 "whimsical & playful" palette. The first five are the brand colours; the rest are
-# tints used inside illustrations.
+W = 1500          # width of every poster row, in SVG units
+MARGIN = 48       # left/right content margin
+RADIUS = 28       # poster corner radius (first and last row)
+
 C = {
-    "cream": "#FBF6F0",
+    "bg": "#FBF6F0",
     "ink": "#0E0E0E",
+    "text": "#2B2B2B",
+    "muted": "#5C5A55",
     "pink": "#FC80D6",
-    "lime": "#C9FF3D",
-    "white": "#FFFFFF",
-    "paper": "#FFFDF8",       # sticky notes, tiles
     "pink_soft": "#FDB6DE",
     "pink_pale": "#FED3EE",
+    "lime": "#C9FB10",
+    "lime_soft": "#DAFA62",
     "lav": "#DAC1FC",
-    "lav_deep": "#B79AF2",
-    "lime_soft": "#E4FF9E",
-    "muted": "#6B655D",
-    "line": "#E6DDD0",
+    "lav_card": "#E3A9FC",
+    "dark": "#0D0D0D",
+    "dark2": "#171717",
+    "tile": "#FFFDF9",
+    "tile_line": "#D9D2C7",
 }
 
 
@@ -101,10 +103,7 @@ def font(style):
 
 
 def text(style, s, x, y, size, fill, anchor="start", ls=0.0, extra=""):
-    """Text as a filled outline path. (x, y) is the baseline origin.
-
-    Styles: display / bold / semi / body (Inter Tight), mono / monob (JetBrains Mono),
-    hand (Caveat, for handwritten notes)."""
+    """Text as a filled outline path. (x, y) is the baseline origin."""
     d = font(style).d(s, x, y, size, ls, anchor)
     return f'<path d="{d}" fill="{fill}"{extra}/>' if d else ""
 
@@ -117,22 +116,28 @@ def cap(style, size):
     return font(style).cap * size
 
 
+def fit(style, s, size, max_w, ls=0.0, min_size=10.0):
+    """Largest font size <= size at which s fits in max_w."""
+    w = tw(style, s, size, ls)
+    return size if w <= max_w else max(min_size, size * max_w / w)
+
+
 # ---------------------------------------------------------------- icons
 
-LUCIDE = {  # lucide-static (ISC licence), 24x24 grid
+LUCIDE = {  # lucide-static 0.460.0 (ISC licence), 24x24 grid
+    "box": '<path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/>',
     "code": '<path d="m18 16 4-4-4-4"/><path d="m6 8-4 4 4 4"/><path d="m14.5 4-5 16"/>',
+    "sparkles": '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/><path d="M20 3v4"/><path d="M22 5h-4"/><path d="M4 17v2"/><path d="M5 18H3"/>',
+    "sparkle": '<path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"/>',
     "database": '<ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5V19A9 3 0 0 0 21 19V5"/><path d="M3 12A9 3 0 0 0 21 12"/>',
+    "smartphone": '<rect width="14" height="20" x="5" y="2" rx="2" ry="2"/><path d="M12 18h.01"/>',
     "mail": '<rect width="20" height="16" x="2" y="4" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>',
+    "external": '<path d="M21 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h6"/><path d="m21 3-9 9"/><path d="M15 3h6v6"/>',
+    "arrow_up_right": '<path d="M7 7h10v10"/><path d="M7 17 17 7"/>',
+    "arrow_right": '<path d="M5 12h14"/><path d="m12 5 7 7-7 7"/>',
     "lightbulb": '<path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/>',
     "pencil": '<path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/><path d="m15 5 4 4"/>',
     "refresh": '<path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"/><path d="M8 16H3v5"/>',
-    "map_pin": '<path d="M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0"/><circle cx="12" cy="10" r="3"/>',
-    "grad_cap": '<path d="M21.42 10.922a1 1 0 0 0-.019-1.838L12.83 5.18a2 2 0 0 0-1.66 0L2.6 9.08a1 1 0 0 0 0 1.832l8.57 3.908a2 2 0 0 0 1.66 0z"/><path d="M22 10v6"/><path d="M6 12.5V16a6 3 0 0 0 12 0v-3.5"/>',
-    "book": '<path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H19a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H6.5a1 1 0 0 1 0-5H20"/>',
-    "commit": '<circle cx="12" cy="12" r="3"/><path d="M3 12h6"/><path d="M15 12h6"/>',
-    "pull_request": '<circle cx="18" cy="18" r="3"/><circle cx="6" cy="6" r="3"/><path d="M13 6h3a2 2 0 0 1 2 2v7"/><path d="M6 9v12"/>',
-    "star": '<path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z"/>',
-    "linkedin": '<path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect width="4" height="12" x="2" y="9"/><circle cx="4" cy="4" r="2"/>',
 }
 
 GITHUB_MARK = ("M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.91.575.101.79-.244.79-.546 0-.273-.014-1.178-.014-2.142"
@@ -141,11 +146,6 @@ GITHUB_MARK = ("M12.5.75C6.146.75 1 5.896 1 12.25c0 5.089 3.292 9.387 7.863 10.9
                "-.115-.288-.517-1.467.115-3.048 0 0 .963-.302 3.163 1.179.92-.259 1.897-.388 2.875-.388.977 0 1.955.13 2.875.388 2.2-1.495 "
                "3.162-1.179 3.162-1.179.633 1.581.23 2.76.115 3.048.733.805 1.179 1.825 1.179 3.09 0 4.413-2.688 5.39-5.247 5.678.417.36.776 "
                "1.05.776 2.128 0 1.538-.014 2.774-.014 3.162 0 .302.216.662.79.547C20.709 21.637 24 17.324 24 12.25 24 5.896 18.854.75 12.5.75Z")
-
-
-# A four-point twinkle star in a 32 x 32 box (lime fill + ink outline reads on light and dark).
-TWINKLE = ("M16 2 C 17.2 11, 21 14.8 30 16 C 21 17.2, 17.2 21, 16 30 C 14.8 21, 11 17.2, 2 16 "
-           "C 11 14.8, 14.8 11, 16 2 Z")
 
 
 def icon(name, x, y, size, color, sw=2.0):
@@ -180,59 +180,73 @@ def rect(x, y, w, h, fill="none", rx=0, stroke=None, sw=1.5, extra=""):
 
 
 def line(x1, y1, x2, y2, stroke, sw=1.5, extra=""):
-    return (f'<path d="M{fmt(x1)} {fmt(y1)}L{fmt(x2)} {fmt(y2)}" stroke="{stroke}" stroke-width="{fmt(sw)}" '
-            f'stroke-linecap="round"{extra}/>')
+    return f'<path d="M{fmt(x1)} {fmt(y1)}L{fmt(x2)} {fmt(y2)}" stroke="{stroke}" stroke-width="{fmt(sw)}"{extra}/>'
 
 
 def poly(points, fill, extra=""):
     return f'<path d="M{"L".join(f"{fmt(x)} {fmt(y)}" for x, y in points)}Z" fill="{fill}"{extra}/>'
 
 
-def path(d, fill="none", stroke=None, sw=2.5, extra=""):
-    st = (f' stroke="{stroke}" stroke-width="{fmt(sw)}" stroke-linecap="round" stroke-linejoin="round"'
-          if stroke else "")
-    return f'<path d="{d}" fill="{fill}"{st}{extra}/>'
+def poster_bg(w, h, top=False, bottom=False, r=RADIUS, fill=None):
+    fill = fill or C["bg"]
+    tl = tr = r if top else 0
+    bl = br = r if bottom else 0
+    d = (f"M{tl} 0H{w - tr}" + (f"A{tr} {tr} 0 0 1 {w} {tr}" if tr else "") + f"V{h - br}"
+         + (f"A{br} {br} 0 0 1 {w - br} {h}" if br else "") + f"H{bl}"
+         + (f"A{bl} {bl} 0 0 1 0 {h - bl}" if bl else "") + f"V{tl}"
+         + (f"A{tl} {tl} 0 0 1 {tl} 0" if tl else "") + "Z")
+    return f'<path d="{d}" fill="{fill}"/>'
 
 
-def m_mark(cx, cy, size, uid="m", main="#FFFFFF", accent=None):
-    """The MaiCoderHoon 'M': two rounded peaks with a pink foot, slightly italic.
-
-    Drawn centred on (cx, cy), `size` wide. Returns (defs, body); `uid` keeps the
-    clip-path id unique when a document uses the mark more than once."""
-    accent = accent or C["pink"]
-    s = size / 40
-    clip = f'<clipPath id="{uid}"><rect x="-6" y="-6" width="52" height="34"/></clipPath>'
-    body = (f'<g transform="translate({fmt(cx)} {fmt(cy)}) skewX(-9) scale({s:.4f}) translate(-20 -14)" '
-            f'clip-path="url(#{uid})">'
-            f'<polyline points="0 30 9.5 1.5 20 22 30.5 1.5 34.6 13.8" fill="none" stroke="{main}" '
-            f'stroke-width="8.5" stroke-linejoin="round"/>'
-            f'<path d="M36 18 L40.5 31.5" stroke="{accent}" stroke-width="8.5"/></g>')
-    return clip, body
+def section_title(x, baseline, label, mark="slash", size=26):
+    """Section heading: pink slash (or lime square) + heavy uppercase label."""
+    ch = cap("display", size)
+    if mark == "slash":
+        top, bot = baseline - ch - 1, baseline + 1
+        out = poly([(x + 12, top), (x + 28, top), (x + 16, bot), (x, bot)], C["pink"])
+        tx = x + 40
+    else:
+        sq = ch * 0.92
+        out = rect(x, baseline - ch + (ch - sq) / 2, sq, sq, C["lime"])
+        tx = x + sq + 14
+    return out + text("display", label, tx, baseline, size, C["ink"], ls=-0.01)
 
 
-# Motion is always optional: every animated SVG is fully drawn in its first frame
-# and stops animating for viewers who ask for reduced motion.
-REDUCED_MOTION = "@media (prefers-reduced-motion:reduce){*{animation:none!important}}"
+# ---------------------------------------------------------------- scenes
 
+class Scene:
+    """A full-width poster row that can be exported whole or cropped into slices.
 
-def doc(w, h, body, title, defs="", style="", decorative=False):
-    """A standalone SVG document sized w x h."""
-    css = f"<style>{style}{REDUCED_MOTION}</style>" if style else ""
-    d = f"<defs>{defs}</defs>" if defs else ""
-    aria = ' aria-hidden="true"' if decorative else ' role="img"'
-    return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{fmt(w)}" height="{fmt(h)}" '
-            f'viewBox="0 0 {fmt(w)} {fmt(h)}"{aria}><title>{esc(title)}</title>{css}{d}{body}</svg>\n')
+    Each item may declare the x/y extent it occupies so a crop only carries the
+    items that are visible in it.
+    """
+
+    def __init__(self, h, w=W):
+        self.w, self.h = w, h
+        self.items, self.defs = [], []
+
+    def add(self, svg, x0=-1e9, x1=1e9, y0=-1e9, y1=1e9):
+        self.items.append((x0, x1, y0, y1, svg))
+
+    def svg(self, x0=0, x1=None, title="", y0=0, y1=None):
+        x1 = self.w if x1 is None else x1
+        y1 = self.h if y1 is None else y1
+        body = "".join(s for a, b, c, d, s in self.items if b > x0 and a < x1 and d > y0 and c < y1)
+        defs = f"<defs>{''.join(self.defs)}</defs>" if self.defs else ""
+        w, h = x1 - x0, y1 - y0
+        return (f'<svg xmlns="http://www.w3.org/2000/svg" width="{fmt(w)}" height="{fmt(h)}" '
+                f'viewBox="{fmt(x0)} {fmt(y0)} {fmt(w)} {fmt(h)}" preserveAspectRatio="none" role="img">'
+                f'<title>{esc(title)}</title>{defs}{body}</svg>\n')
 
 
 def write(name, content):
-    """Write assets/<name>, creating sub-folders as needed."""
-    path_ = os.path.join(ASSETS, *name.split("/"))
-    os.makedirs(os.path.dirname(path_), exist_ok=True)
+    os.makedirs(ASSETS, exist_ok=True)
+    path = os.path.join(ASSETS, name)
     for attempt in range(5):  # sync clients (e.g. OneDrive) can briefly lock a file they are uploading
         try:
-            with open(path_, "w", encoding="utf-8", newline="\n") as f:
+            with open(path, "w", encoding="utf-8", newline="\n") as f:
                 f.write(content)
-            return path_
+            return path
         except OSError:
             if attempt == 4:
                 raise

@@ -1,8 +1,7 @@
 name: Sync Stats Card
 
-# Rebuilds the stats tiles (stats.svg) and contribution graph (contributions.svg) and
-# publishes them to the `output` branch (not `main`), so bot updates never show up as
-# contributions or clutter history.
+# Rebuilds the stats + contribution graph card and publishes it to the `output`
+# branch (not `main`), so bot updates never show up as contributions or clutter history.
 on:
   schedule:
     - cron: "*/10 * * * *"
@@ -26,10 +25,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Generate stats cards
+      - name: Generate stats card
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: python3 .github/scripts/gen_stats.py --out-dir dist
+        run: python3 .github/scripts/gen_stats.py --out dist/stats.svg
 
       - name: Publish to output branch
         if: hashFiles('dist/stats.svg') != ''
