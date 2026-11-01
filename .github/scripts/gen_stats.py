@@ -1,107 +1,148 @@
 #!/usr/bin/env python3
-"""Generate assets/stats.svg using only the Python standard library.
+"""Render assets/stats.svg: GitHub stats, contribution graph and "now exploring".
 
-Run by .github/workflows/stats.yml. If the GitHub API is unreachable the existing card is left untouched.
+Run by .github/workflows/stats.yml (standard library only). If GitHub can't be
+reached the existing card is left untouched. `--placeholder` renders empty data.
 """
-import datetime
-import html
 import json
 import os
+import re
 import sys
+import urllib.parse
 import urllib.request
+
+from svgkit import C, MARGIN, W, Scene, cap, github_mark, icon, line, poster_bg, rect, section_title, text, tw, write
 
 OWNER = os.environ.get("GITHUB_REPOSITORY_OWNER") or "MaiCoderHoon"
 TOKEN = os.environ.get("GITHUB_TOKEN")
-OUT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "assets", "stats.svg")
-INK, GRAY, BORDER = "#151515", "#5E5A52", "#151515"
-PALETTE = ["#D7FF3F", "#FF6B35", "#4B55E8", "#151515", "#D7FF3F", "#FF6B35", "#4B55E8"]
-SANS, MONO = "'Arial',sans-serif", "'Courier New',monospace"
+LEVELS = ["#0B3D14", "#22802A", "#4BAE2C", "#97DE1A", C["lime"]]
+EXPLORING = [("ML / AI", "sparkle"), ("Data Science", "database"), ("App Dev", "smartphone")]
 
-def esc(s):
-    return html.escape(str(s), quote=False)
+
+def request(url, data=None, accept="application/vnd.github+json"):
+    headers = {"Accept": accept, "User-Agent": "profile-stats-card"}
+    if TOKEN and "api.github.com" in url:
+        headers["Authorization"] = "Bearer " + TOKEN
+    req = urllib.request.Request(url, data=data, headers=headers)
+    with urllib.request.urlopen(req, timeout=30) as resp:
+        return resp.read().decode("utf-8")
+
 
 def api(path):
-    headers = {"Accept": "application/vnd.github+json", "User-Agent": "profile-stats-card"}
-    if TOKEN:
-        headers["Authorization"] = "Bearer " + TOKEN
-    req = urllib.request.Request("https://api.github.com" + path, headers=headers)
-    with urllib.request.urlopen(req, timeout=30) as resp:
-        return json.load(resp)
+    return json.loads(request("https://api.github.com" + path))
+
+
+def calendar_graphql():
+    query = ('query($login:String!){user(login:$login){contributionsCollection{contributionCalendar{'
+             'totalContributions weeks{contributionDays{weekday contributionLevel}}}}}}')
+    body = json.dumps({"query": query, "variables": {"login": OWNER}}).encode()
+    cal = json.loads(request("https://api.github.com/graphql", data=body))["data"]["user"][
+        "contributionsCollection"]["contributionCalendar"]
+    names = ["NONE", "FIRST_QUARTILE", "SECOND_QUARTILE", "THIRD_QUARTILE", "FOURTH_QUARTILE"]
+    weeks = [[(d["weekday"], names.index(d["contributionLevel"])) for d in w["contributionDays"]] for w in cal["weeks"]]
+    return cal["totalContributions"], weeks
+
+
+def calendar_html():
+    page = request(f"https://github.com/users/{urllib.parse.quote(OWNER)}/contributions", accept="text/html")
+    cells = {}
+    for tag in re.findall(r"<td[^>]*ContributionCalendar-day[^>]*>", page):
+        m = re.search(r'id="contribution-day-component-(\d+)-(\d+)"', tag)
+        lv = re.search(r'data-level="(\d)"', tag)
+        if m and lv:
+            cells.setdefault(int(m.group(2)), []).append((int(m.group(1)), int(lv.group(1))))
+    total = re.search(r"([\d,]+)\s+contributions?\s+in the last year", page)
+    if not cells:
+        raise RuntimeError("no calendar cells found")
+    return (int(total.group(1).replace(",", "")) if total else None), [cells[k] for k in sorted(cells)]
+
 
 def collect():
     user = api(f"/users/{OWNER}")
-    repos = [r for r in api(f"/users/{OWNER}/repos?per_page=100&type=owner")
-             if not r.get("fork") and r["name"].lower() != OWNER.lower()]
-    langs = {}
-    for r in repos:
-        try:
-            for lang, size in api(f"/repos/{OWNER}/{r['name']}/languages").items():
-                langs[lang] = langs.get(lang, 0) + size
-        except Exception:
-            continue
-    return {"repos": len(repos), "stars": sum(r.get("stargazers_count", 0) for r in repos),
-            "forks": sum(r.get("forks_count", 0) for r in repos),
-            "followers": user.get("followers", 0), "langs": langs}
+    repos = [r for r in api(f"/users/{OWNER}/repos?per_page=100&type=owner") if not r.get("fork")]
+    commits = api(f"/search/commits?q=author:{OWNER}&per_page=1")["total_count"]
+    prs = api(f"/search/issues?q=author:{OWNER}+type:pr&per_page=1")["total_count"]
+    try:
+        total, weeks = calendar_graphql() if TOKEN else calendar_html()
+    except Exception as exc:
+        print("graphql calendar failed, using public page:", exc)
+        total, weeks = calendar_html()
+    return {"repos": user.get("public_repos", 0), "commits": commits, "prs": prs,
+            "stars": sum(r.get("stargazers_count", 0) for r in repos), "total": total, "weeks": weeks}
 
-def render(data, updated):
-    tiles = [("Public repos", data["repos"], PALETTE[0]), ("Stars earned", data["stars"], PALETTE[1]),
-             ("Forks", data["forks"], PALETTE[2]), ("Followers", data["followers"], PALETTE[3])]
-    out = ['<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="300" viewBox="0 0 1000 300">']
-    out.append('<defs><clipPath id="bar"><rect x="60" y="196" width="880" height="20"/></clipPath><pattern id="grid" width="24" height="24" patternUnits="userSpaceOnUse"><path d="M24 0H0V24" fill="none" stroke="#151515" stroke-opacity=".08"/></pattern></defs>')
-    out.append('<rect width="1000" height="300" fill="#F3EFE6"/><rect width="1000" height="300" fill="url(#grid)"/>')
-    out.append(f'<rect x="1" y="1" width="998" height="298" fill="none" stroke="{BORDER}" stroke-width="2"/>')
-    out.append(f'<text x="60" y="48" font-family="{SANS}" font-size="22" font-weight="800" fill="{INK}">GITHUB / SNAPSHOT</text>')
-    out.append(f'<text x="940" y="48" text-anchor="end" font-family="{MONO}" font-size="12" fill="{GRAY}">@{esc(OWNER)}</text>')
-    for i, (label, value, color) in enumerate(tiles):
-        x = 60 + i * 225
-        out.append(f'<rect x="{x}" y="70" width="205" height="86" fill="#F3EFE6" stroke="{color}" stroke-width="3"/>')
-        out.append(f'<rect x="{x+2}" y="84" width="6" height="58" fill="{color}"/>')
-        out.append(f'<text x="{x+28}" y="116" font-family="{SANS}" font-size="38" font-weight="800" fill="{color}">{esc(value)}</text>')
-        out.append(f'<text x="{x+28}" y="141" font-family="{SANS}" font-size="13" font-weight="600" fill="{INK}">{esc(label)}</text>')
-    out.append(f'<text x="60" y="184" font-family="{MONO}" font-size="12" font-weight="700" letter-spacing="3" fill="{GRAY}">TOP LANGUAGES</text>')
-    out.append('<rect x="60" y="196" width="880" height="20" fill="#E3DED3"/>')
-    langs = sorted(data["langs"].items(), key=lambda kv: kv[1], reverse=True)
-    total = sum(v for _, v in langs)
-    if total:
-        top = langs[:6]
-        rest = total - sum(v for _, v in top)
-        if rest > 0:
-            top.append(("Other", rest))
-        x = 60.0
-        out.append('<g clip-path="url(#bar)">')
-        for i, (name, size) in enumerate(top):
-            w = 880.0 * size / total
-            color = PALETTE[i % len(PALETTE)] if name != "Other" else "#B8B1A4"
-            out.append(f'<rect x="{x:.1f}" y="196" width="{w:.1f}" height="20" fill="{color}"/>')
-            x += w
-        out.append('</g>')
-        lx = 60
-        for i, (name, size) in enumerate(top):
-            color = PALETTE[i % len(PALETTE)] if name != "Other" else "#B8B1A4"
-            label = f"{name} {100.0 * size / total:.0f}%"
-            out.append(f'<circle cx="{lx+6}" cy="244" r="6" fill="{color}"/><text x="{lx+18}" y="249" font-family="{SANS}" font-size="13" font-weight="600" fill="{INK}">{esc(label)}</text>')
-            lx += 18 + len(label) * 7.6 + 22
-    else:
-        out.append(f'<text x="60" y="250" font-family="{SANS}" font-size="13" fill="{GRAY}">Languages appear after the first automatic refresh.</text>')
-    out.append(f'<text x="940" y="284" text-anchor="end" font-family="{MONO}" font-size="11" fill="{GRAY}">auto-updated {esc(updated)} by GitHub Actions</text>')
-    out.append('</svg>')
-    return "\\n".join(out)
+
+def short(n):
+    if not isinstance(n, int):
+        return str(n)
+    if n >= 1000:
+        return f"{n / 1000:.1f}".rstrip("0").rstrip(".") + "K+"
+    return str(n)
+
+
+def render(data):
+    h = 200
+    sc = Scene(h)
+    sc.add(poster_bg(W, h))
+    sc.add(line(MARGIN, 10, W - MARGIN, 10, C["ink"], 1.5))
+
+    # GitHub stats
+    sc.add(section_title(MARGIN, 62, "GITHUB STATS", mark="square", size=22))
+    sc.add(github_mark(MARGIN + 2, 96, 60, C["ink"]))
+    stats = [("Repos", data["repos"]), ("Commits", data["commits"]), ("PRs", data["prs"]), ("Stars", data["stars"])]
+    for i, (label, value) in enumerate(stats):
+        cx = 172 + i * 92
+        sc.add(text("display", short(value), cx, 132, 31, C["ink"], anchor="middle", ls=-0.02))
+        sc.add(text("body", label, cx, 160, 16.5, C["text"], anchor="middle"))
+        if i:
+            sc.add(f'<circle cx="{cx - 46}" cy="122" r="2.2" fill="{C["ink"]}"/>')
+    sc.add(line(492, 34, 492, 186, C["ink"], 1.5))
+
+    # contribution graph
+    gx0, gx1, gy = 518, 1000, 88
+    sc.add(section_title(gx0, 62, "CONTRIBUTION GRAPH", mark="square", size=22))
+    weeks = data["weeks"] or [[(d, 0) for d in range(7)] for _ in range(53)]
+    cell = (gx1 - gx0) / len(weeks)
+    sc.add(rect(gx0, gy, gx1 - gx0, cell * 7, "#062B0D"))
+    for i, week in enumerate(weeks):
+        for day, level in week:
+            sc.add(rect(gx0 + i * cell + 0.6, gy + day * cell + 0.6, cell - 1.2, cell - 1.2, LEVELS[level]))
+    caption = (f"{data['total']:,} contributions in the last year" if isinstance(data.get("total"), int)
+               else "Contributions in the last year")
+    sc.add(text("body", caption, gx0, gy + cell * 7 + 30, 15, C["muted"]))
+    sc.add(line(1026, 34, 1026, 186, C["ink"], 1.5))
+
+    # now exploring
+    nx0, nx1 = 1052, W - MARGIN
+    sc.add(section_title(nx0, 62, "NOW EXPLORING", mark="square", size=22))
+    size, pad, isz, gap, ph = 17, 15, 20, 10, 50
+
+    def pw(label, s):
+        return pad + isz + 9 + tw("semi", label, s) + pad
+
+    while sum(pw(l, size) for l, _ in EXPLORING) + gap * (len(EXPLORING) - 1) > nx1 - nx0:
+        size -= 0.25
+    px, py = nx0, 94
+    for label, ic in EXPLORING:
+        w = pw(label, size)
+        sc.add(rect(px + 0.75, py + 0.75, w - 1.5, ph - 1.5, C["tile"], rx=12, stroke=C["tile_line"], sw=1.5))
+        sc.add(icon(ic, px + pad, py + (ph - isz) / 2, isz, C["ink"], 1.9))
+        sc.add(text("semi", label, px + pad + isz + 9, py + ph / 2 + cap("semi", size) / 2, size, C["ink"]))
+        px += w + gap
+    return sc.svg(title="GitHub stats, contribution graph and what I'm exploring now")
+
 
 def main():
     if "--placeholder" in sys.argv:
-        data, updated = {"repos": "-", "stars": "-", "forks": "-", "followers": "-", "langs": {}}, "on first run"
+        data = {"repos": "–", "commits": "–", "prs": "–", "stars": "–", "total": None, "weeks": []}
     else:
         try:
             data = collect()
         except Exception as exc:
             print("stats refresh skipped:", exc)
             return 0
-        updated = datetime.datetime.now(datetime.timezone.utc).strftime("%Y-%m-%d")
-    os.makedirs(os.path.dirname(OUT), exist_ok=True)
-    with open(OUT, "w", encoding="utf-8") as f:
-        f.write(render(data, updated))
-    print("wrote", os.path.normpath(OUT))
+    print("wrote", write("stats.svg", render(data)))
     return 0
+
 
 if __name__ == "__main__":
     sys.exit(main())
