@@ -53,10 +53,10 @@ APPROACH = [("lightbulb", "#FDB0DD", "Discover", ["Understand", "the problem."])
             ("code", "#CFAAFC", "Build", ["Turn ideas", "into reality."]),
             ("refresh", C["lime"], "Iterate", ["Improve with", "real feedback."])]
 TOOLKIT = [["python", "postgresql", "kotlin", "java", "cpp", "c"],
-           ["flutter", "jetpackcompose", "fastapi", "pandas", "scikitlearn", "figma"]]
+           ["flutter", "jetpackcompose", "android", "fastapi", "pandas", "scikitlearn", "figma"]]
 TOOL_NAMES = {"python": "Python", "postgresql": "PostgreSQL", "kotlin": "Kotlin", "java": "Java", "cpp": "C++",
-              "c": "C", "flutter": "Flutter", "jetpackcompose": "Jetpack Compose", "fastapi": "FastAPI",
-              "pandas": "pandas", "scikitlearn": "scikit-learn", "figma": "Figma"}
+              "c": "C", "flutter": "Flutter", "jetpackcompose": "Jetpack Compose", "android": "Android",
+              "fastapi": "FastAPI", "pandas": "pandas", "scikitlearn": "scikit-learn", "figma": "Figma"}
 BUTTONS = [("email", "Email", 87, 190), ("linkedin", "LinkedIn", 293, 209), ("github", "GitHub", 518, 199)]
 
 
@@ -324,14 +324,26 @@ def approach_toolkit(sc):
         for j, s in enumerate(lines):
             sc.add(text("body", s, cx, 1816 + j * 30, 23.2, C["text"], anchor="middle", heavy=0.4))
 
+    # Tiles are sized to fit the longest row within [tx0, tx1], so the grid stays inside the
+    # poster however many tools each row holds; shorter rows are centred under the longest one.
+    tx0, tx1, gap, ygap = 1005, 1707, 14, 15
+    cols = max(len(r) for r in TOOLKIT)
+    tile = (tx1 - tx0 - (cols - 1) * gap) / cols
+    th = tile * 0.95
+    pitch = tile + gap
+    isz = tile * 0.62
     for r, row in enumerate(TOOLKIT):
+        y = 1645 + r * (th + ygap)
+        row_w = len(row) * tile + (len(row) - 1) * gap
+        rx0 = tx0 + (tx1 - tx0 - row_w) / 2
         for i, name in enumerate(row):
-            x, y = 1042 + i * 114.5, 1645 + r * 110
-            sc.add(rect(x, y, 100, 95, C["card"], rx=18, stroke=C["card_line"], sw=2, extra=' filter="url(#soft-shadow)"'))
+            x = rx0 + i * pitch
+            sc.add(rect(x, y, tile, th, C["card"], rx=tile * 0.18, stroke=C["card_line"], sw=2,
+                        extra=' filter="url(#soft-shadow)"'))
             if name in ("c", "cpp"):
-                sc.add(lang_letter(name, x + 50, y + 47.5, 60))
+                sc.add(lang_letter(name, x + tile / 2, y + th / 2, tile * 0.6))
             else:
-                sc.add(brand_icon(name, x + 50 - 31, y + 47.5 - 31, 62))
+                sc.add(brand_icon(name, x + tile / 2 - isz / 2, y + th / 2 - isz / 2, isz))
 
 
 def footer(sc, clip):
